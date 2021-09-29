@@ -1,0 +1,1 @@
+web: ./build/install/betting-doctor/bin/betting-doctor

@@ -1,0 +1,5 @@
+{
+  "name": "Betting Doctor",
+  "description": "Betting Doctor REST API",
+  "image": "heroku/java"
+}
