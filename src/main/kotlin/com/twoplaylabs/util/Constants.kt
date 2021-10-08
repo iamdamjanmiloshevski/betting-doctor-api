@@ -87,9 +87,9 @@ object Constants {
         "<html><body><p>Hi %s,<br/>You've successfully registered to Betting Doctor<br/><br/>Please verify your account by clicking on the following <a href='%s'>link</a>"
     const val REGISTER_HTML_MESSAGE2 =
         "Hi %s,\n You've successfully registered to Betting Doctor\n\nPlease verify your account by clicking on the following link %s"
-   const val FEEDBACK_SUCCESS_MESSAGE1 = "Dear %s, thank you for your feedback. We will review it carefully and get back to you as soon as possible.\n\nKind regards, \n\n 2Play Technologies Team"
+   const val FEEDBACK_SUCCESS_MESSAGE1 = "Dear %s,\n\n Thank you for your feedback.\n\n We will review it carefully and get back to you as soon as possible.\n\nKind regards, \n\n 2Play Technologies Team"
     const val FEEDBACK_HTML_MESSAGE =
-        "<html><body><p>Dear %s, thank you for your feedback.<br/><br/>We will review it carefully and get back to you as soon as possible.<br/> Kind regards, <br/></br/> 2Play Technologies team"
+        "<html><body><p>Dear %s,<br/><br/> Thank you for your feedback.<br/><br/>We will review it carefully and get back to you as soon as possible.<br/><br/>Kind regards, <br/></br/> 2Play Technologies team"
     const val INSUFFICIENT_PERMISSIONS = "Insufficient permissions"
     const val MISSING_REFRESH_TOKEN = "Missing refresh token"
     const val UNABLE_TO_VERIFY_REFRESH_TOKEN = "Unable to verify refresh token"
