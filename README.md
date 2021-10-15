@@ -3,7 +3,7 @@
 
 ## Contents
 #### 1. [Developer](#developer)
-#### 2. [Technical specifications](#technical-specifications:)
+#### 2. [Technical specifications](#technical-specifications)
 #### 3. [Hosting](#hosting)
 #### 4. [API Documentation](#api-documentation)
 #### 5. [Endpoints](#endpoints)
@@ -14,7 +14,7 @@
 
 *Damjan Miloshevski on behalf of [2Play Technologies Limited](https://2playlabs.com/)*
 
-### Technical specifications:
+### Technical specifications
 
 * Framework
     - KTOR by JetBrains
