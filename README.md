@@ -66,7 +66,7 @@ Hosted by Heroku
 
 This API is public and available to be consumed.
 > Note: Some routes are authenticated and require a Bearer token to return data otherwise the response will be 401 Unauthorized.
-> Please reach out the developer for more details
+> Please reach out to the developer for more details
 
 The api can be consumed in the following url:
 
