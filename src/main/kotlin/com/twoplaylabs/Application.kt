@@ -37,8 +37,9 @@ import com.twoplaylabs.util.AuthUtil.retrieveFirebaseCredentials
 import com.twoplaylabs.util.Constants
 import com.twoplaylabs.util.Constants.PORT
 import com.twoplaylabs.util.toInputStream
-import io.ktor.auth.Authentication.Feature.install
+import io.ktor.application.*
 import io.ktor.features.*
+import org.slf4j.event.Level
 
 private val bettingTipsRepository = BettingTipsRepositoryImpl()
 private val usersRepository = UsersRepositoryImpl()
@@ -47,7 +48,7 @@ private val jwtService = JWTService()
 fun main() {
     val httpPort = System.getenv(PORT)?.toInt() ?: 8080
     embeddedServer(Netty, port = httpPort) {
-        //install(CallLogging)
+        install(CallLogging)
         configureFirebase()
         configureSecurity(jwtService, usersRepository)
         configureRouting(bettingTipsRepository, usersRepository, jwtService)

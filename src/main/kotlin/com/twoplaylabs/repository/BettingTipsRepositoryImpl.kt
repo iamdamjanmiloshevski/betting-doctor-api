@@ -57,7 +57,7 @@ class BettingTipsRepositoryImpl : BettingTipsRepository, BaseRepository() {
             items.toList()
         } else {
             val items = bettingTipsCollection.find(and(BettingTip::sport eq sport, BettingTip::gameTime lt currentDate))
-                .sort(ascending(BettingTip::gameTime))
+                .sort(descending(BettingTip::gameTime))
             items.toList()
         }
     }
