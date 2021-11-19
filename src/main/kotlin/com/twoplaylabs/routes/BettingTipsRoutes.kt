@@ -37,6 +37,7 @@ import com.twoplaylabs.util.Constants
 import com.twoplaylabs.util.Constants.AUTH_CONFIG_ADMIN
 import com.twoplaylabs.util.Constants.BETTING_TIPS_ROUTE
 import com.twoplaylabs.util.Constants.INSUFFICIENT_PERMISSIONS
+import com.twoplaylabs.util.Constants.SPORTSDB_API_KEY
 import com.twoplaylabs.util.GsonUtil
 import com.twoplaylabs.util.TeamImageProvider
 import io.ktor.application.*
@@ -293,7 +294,7 @@ fun String.convertIfSoccer(): String {
 
 private fun String.createURLForTeamData(sport: String): String {
     return when (sport) {
-        "Tennis", "tennis" -> "https://www.thesportsdb.com/api/v1/json/2/searchplayers.php?p=${this}"
-        else -> "https://www.thesportsdb.com/api/v1/json/2/searchteams.php?t=${this}"
+        "Tennis", "tennis" -> "https://www.thesportsdb.com/api/v1/json/".plus(System.getenv(SPORTSDB_API_KEY)).plus("/searchplayers.php?p=${this}")
+        else -> "https://www.thesportsdb.com/api/v1/json/".plus(System.getenv(SPORTSDB_API_KEY)).plus("/searchteams.php?t=${this}")
     }
 }
