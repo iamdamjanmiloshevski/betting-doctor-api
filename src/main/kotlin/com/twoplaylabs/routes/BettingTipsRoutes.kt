@@ -293,7 +293,7 @@ fun String.convertIfSoccer(): String {
 
 private fun String.createURLForTeamData(sport: String): String {
     return when (sport) {
-        "Tennis", "tennis" -> "https://www.thesportsdb.com/api/v1/json/1/searchplayers.php?p=${this}"
-        else -> "https://www.thesportsdb.com/api/v1/json/1/searchteams.php?t=${this}"
+        "Tennis", "tennis" -> "https://www.thesportsdb.com/api/v1/json/2/searchplayers.php?p=${this}"
+        else -> "https://www.thesportsdb.com/api/v1/json/2/searchteams.php?t=${this}"
     }
 }
