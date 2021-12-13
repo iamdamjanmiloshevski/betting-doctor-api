@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-package com.twoplaylabs.routes
+package com.twoplaylabs.controllers
 
 import com.twoplaylabs.common.Message
 import com.twoplaylabs.data.BettingTip
@@ -51,7 +51,6 @@ import io.ktor.http.*
 import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.routing.*
-import io.ktor.utils.io.bits.*
 import kotlinx.coroutines.runBlocking
 import java.util.*
 
@@ -62,22 +61,22 @@ import java.util.*
     Project: betting-doctor
 */
 
-fun Route.configureBettingTipsRouting(repository: BettingTipsRepository) {
+fun Route.bettingTipsController(repository: BettingTipsRepository) {
     route(BETTING_TIPS_ROUTE) {
         authenticate(System.getenv(AUTH_CONFIG_ADMIN)) {
-            createBettingTip(repository)
-            updateBettingTip(repository)
-            deleteAllBettingTips(repository)
-            deleteBettingTipById(repository)
+            createBettingTipController(repository)
+            updateBettingTipController(repository)
+            deleteAllBettingTipsController(repository)
+            deleteBettingTipByIdController(repository)
         }
-        getBettingTips(repository)
-        getUpcomingTipsBySport(repository)
-        getOlderTipsBySport(repository)
-        getBettingTipById(repository)
+        getBettingTipsController(repository)
+        getUpcomingTipsBySportController(repository)
+        getOlderTipsBySportController(repository)
+        getBettingTipByIdController(repository)
     }
 }
 
-private fun Route.getBettingTips(repository: BettingTipsRepository) {
+private fun Route.getBettingTipsController(repository: BettingTipsRepository) {
     get {
         //get all betting tips
         try {
@@ -93,7 +92,7 @@ private fun Route.getBettingTips(repository: BettingTipsRepository) {
     }
 }
 
-private fun Route.getUpcomingTipsBySport(repository: BettingTipsRepository) {
+private fun Route.getUpcomingTipsBySportController(repository: BettingTipsRepository) {
     get(Constants.UPCOMING_TIPS_BY_SPORT_ROUTE) {
         val sport = call.parameters[Constants.PARAM_SPORT] ?: return@get call.respond(
             HttpStatusCode.BadRequest, Message(Constants.MISSING_SPORT, HttpStatusCode.BadRequest.value)
@@ -115,7 +114,7 @@ private fun Route.getUpcomingTipsBySport(repository: BettingTipsRepository) {
     }
 }
 
-private fun Route.getOlderTipsBySport(repository: BettingTipsRepository) {
+private fun Route.getOlderTipsBySportController(repository: BettingTipsRepository) {
     get(Constants.OLDER_TIPS_BY_SPORT_ROUTE) {
         val sport = call.parameters[Constants.PARAM_SPORT] ?: return@get call.respond(
             HttpStatusCode.BadRequest, Message(Constants.MISSING_SPORT, HttpStatusCode.BadRequest.value)
@@ -137,7 +136,7 @@ private fun Route.getOlderTipsBySport(repository: BettingTipsRepository) {
     }
 }
 
-private fun Route.getBettingTipById(repository: BettingTipsRepository) {
+private fun Route.getBettingTipByIdController(repository: BettingTipsRepository) {
     get(Constants.ID_ROUTE) {
         //get betting tip by id
         val id = call.parameters[Constants.PARAM_ID] ?: return@get call.respondText(
@@ -154,7 +153,7 @@ private fun Route.getBettingTipById(repository: BettingTipsRepository) {
     }
 }
 
-private fun Route.createBettingTip(repository: BettingTipsRepository) {
+private fun Route.createBettingTipController(repository: BettingTipsRepository) {
     post {
         //post betting tip
         val principal = call.principal<User>()
@@ -220,7 +219,7 @@ private suspend inline fun <reified T : SportsApiData> HttpClient.fetchTeamData(
     return GsonUtil.deserialize(T::class.java, teamJson)
 }
 
-fun Route.updateBettingTip(repository: BettingTipsRepository) {
+fun Route.updateBettingTipController(repository: BettingTipsRepository) {
     put {
         val bettingTip = call.receive<BettingTip>()
         try {
@@ -244,7 +243,7 @@ fun Route.updateBettingTip(repository: BettingTipsRepository) {
     }
 }
 
-private fun Route.deleteAllBettingTips(repository: BettingTipsRepository) {
+private fun Route.deleteAllBettingTipsController(repository: BettingTipsRepository) {
     delete {
         try {
             val deletedCount = repository.deleteAllBettingTips()
@@ -262,7 +261,7 @@ private fun Route.deleteAllBettingTips(repository: BettingTipsRepository) {
     }
 }
 
-private fun Route.deleteBettingTipById(repository: BettingTipsRepository) {
+private fun Route.deleteBettingTipByIdController(repository: BettingTipsRepository) {
     delete(Constants.ID_ROUTE) {
         val id = call.parameters[Constants.PARAM_ID] ?: return@delete call.respond(
             HttpStatusCode.BadRequest,

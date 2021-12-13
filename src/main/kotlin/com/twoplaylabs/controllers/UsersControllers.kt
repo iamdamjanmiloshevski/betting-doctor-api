@@ -22,11 +22,10 @@
  * SOFTWARE.
  */
 
-package com.twoplaylabs.routes
+package com.twoplaylabs.controllers
 
 import at.favre.lib.crypto.bcrypt.BCrypt
 import com.google.firebase.messaging.FirebaseMessaging
-import com.twoplaylabs.auth.AccessToken
 import com.twoplaylabs.auth.JWTService
 import com.twoplaylabs.common.Message
 import com.twoplaylabs.data.FeedbackMessage
@@ -38,20 +37,15 @@ import com.twoplaylabs.util.AuthUtil.generateWelcomeUrl
 import com.twoplaylabs.util.AuthUtil.isRefreshTokenValid
 import com.twoplaylabs.util.Constants
 import com.twoplaylabs.util.Constants.ACCOUNT_VERIFIED_MSG
-import com.twoplaylabs.util.Constants.API_BASE_URL
 import com.twoplaylabs.util.Constants.AUTH_CONFIG_ALL
 import com.twoplaylabs.util.Constants.CHANGE_PWD_ROUTE
-import com.twoplaylabs.util.Constants.EMAIL_PASSWORD
-import com.twoplaylabs.util.Constants.EMAIL_USERNAME
 import com.twoplaylabs.util.Constants.FEEDBACK_HTML_MESSAGE
 import com.twoplaylabs.util.Constants.FEEDBACK_ROUTE
-import com.twoplaylabs.util.Constants.FEEDBACK_SUCCESS
 import com.twoplaylabs.util.Constants.FEEDBACK_SUCCESS_MESSAGE1
 import com.twoplaylabs.util.Constants.HELLO_TEMPLATE
 import com.twoplaylabs.util.Constants.ID_ROUTE
 import com.twoplaylabs.util.Constants.JWT_AUDIENCE
 import com.twoplaylabs.util.Constants.JWT_ID
-import com.twoplaylabs.util.Constants.MAIL_SERVER
 import com.twoplaylabs.util.Constants.MISSING_REFRESH_TOKEN
 import com.twoplaylabs.util.Constants.PARAM_REFRESH_TOKEN
 import com.twoplaylabs.util.Constants.PASSWORD_HASH_COST
@@ -60,17 +54,14 @@ import com.twoplaylabs.util.Constants.REFRESH_TOKEN
 import com.twoplaylabs.util.Constants.REGISTER_HTML_MESSAGE
 import com.twoplaylabs.util.Constants.REGISTER_HTML_MESSAGE2
 import com.twoplaylabs.util.Constants.REGISTER_ROUTE
-import com.twoplaylabs.util.Constants.REGISTER_SUCCESS_MESSAGE
 import com.twoplaylabs.util.Constants.REGISTER_SUCCESS_MESSAGE1
 import com.twoplaylabs.util.Constants.SIGN_IN_VERIFICATION_MSG
-import com.twoplaylabs.util.Constants.SMTP_PORT
 import com.twoplaylabs.util.Constants.TOPIC
 import com.twoplaylabs.util.Constants.UNABLE_TO_VERIFY_REFRESH_TOKEN
 import com.twoplaylabs.util.Constants.USERS_ROUTE
 import com.twoplaylabs.util.Constants.VERIFY_ACCOUNT_MSG
 import com.twoplaylabs.util.Constants.VERIFY_ROUTE
 import com.twoplaylabs.util.Constants.WELCOME
-import com.twoplaylabs.util.EmailManager
 import com.twoplaylabs.util.EmailManager.sendNoReplyEmail
 import com.twoplaylabs.util.JWTDecoder
 import io.ktor.application.*
@@ -80,15 +71,9 @@ import io.ktor.http.*
 import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.routing.*
-import io.ktor.util.*
 import kotlinx.html.*
 import org.bson.types.ObjectId
 import java.util.*
-import org.apache.commons.mail.HtmlEmail;
-import org.threeten.bp.LocalDateTime
-import org.threeten.bp.ZoneOffset
-import org.threeten.bp.ZonedDateTime
-import java.util.concurrent.TimeUnit
 import kotlin.text.toCharArray
 
 /*
@@ -96,26 +81,26 @@ import kotlin.text.toCharArray
     Created on 25/06/2021
     Project: betting-doctor
 */
-fun Route.configureUserRouting(repository: UsersRepository, jwtService: JWTService) {
+fun Route.usersController(repository: UsersRepository, jwtService: JWTService) {
     route(USERS_ROUTE) {
         authenticate(System.getenv(AUTH_CONFIG_ALL)) {
-            getAllUsers(repository)
-            getUserById(repository)
-            updateUser(repository)
-            changePassword(repository)
-            deleteUser(repository)
-            sendNotification()
+            getAllUsersController(repository)
+            getUserByIdController(repository)
+            updateUserController(repository)
+            changePasswordController(repository)
+            deleteUserController(repository)
+            sendNotificationController()
         }
-        signIn(repository, jwtService)
-        register(repository)
-        refreshToken(repository, jwtService)
-        verifyAccount(repository)
-        signOut(repository)
-        feedback(repository)
+        signInController(repository, jwtService)
+        registerController(repository)
+        refreshTokenController(repository, jwtService)
+        verifyAccountController(repository)
+        signOutController(repository)
+        feedbackController(repository)
     }
 }
 
-fun Route.sendNotification() {
+fun Route.sendNotificationController() {
     this.post(PUSH_NOTIFICATIONS) {
         val topic = call.parameters[TOPIC] ?: return@post call.respond(
             HttpStatusCode.BadRequest,
@@ -144,8 +129,8 @@ fun Route.sendNotification() {
 }
 
 
-private fun Route.deleteUser(repository: UsersRepository) {
-    this@deleteUser.delete(ID_ROUTE) {
+private fun Route.deleteUserController(repository: UsersRepository) {
+    this@deleteUserController.delete(ID_ROUTE) {
         val parameters = call.parameters
         val id = parameters[Constants.PARAM_ID] ?: return@delete call.respond(
             HttpStatusCode.BadRequest,
@@ -169,7 +154,7 @@ private fun Route.deleteUser(repository: UsersRepository) {
     }
 }
 
-private fun Route.changePassword(repository: UsersRepository) {
+private fun Route.changePasswordController(repository: UsersRepository) {
     put(CHANGE_PWD_ROUTE) {
         val id = call.parameters[Constants.PARAM_ID] ?: return@put call.respond(
             HttpStatusCode.BadRequest,
@@ -216,7 +201,7 @@ private fun Route.changePassword(repository: UsersRepository) {
     }
 }
 
-private fun Route.updateUser(repository: UsersRepository) {
+private fun Route.updateUserController(repository: UsersRepository) {
     put(ID_ROUTE) {
         val parameters = call.parameters
         val userToUpdate = call.receive<User>()
@@ -254,7 +239,7 @@ private fun Route.updateUser(repository: UsersRepository) {
     }
 }
 
-private fun Route.getUserById(repository: UsersRepository) {
+private fun Route.getUserByIdController(repository: UsersRepository) {
     get(ID_ROUTE) {
         val id = call.parameters[Constants.PARAM_ID] ?: return@get call.respond(
             HttpStatusCode.BadRequest,
@@ -278,7 +263,7 @@ private fun Route.getUserById(repository: UsersRepository) {
     }
 }
 
-private fun Route.getAllUsers(repository: UsersRepository) {
+private fun Route.getAllUsersController(repository: UsersRepository) {
     get {
         try {
             val users = repository.findAllUsers()
@@ -293,7 +278,7 @@ private fun Route.getAllUsers(repository: UsersRepository) {
     }
 }
 
-private fun Route.signOut(repository: UsersRepository) {
+private fun Route.signOutController(repository: UsersRepository) {
     post(Constants.SIGN_OUT_ROUTE) {
         val userInput = call.receive<UserInput>()
         try {
@@ -311,7 +296,7 @@ private fun Route.signOut(repository: UsersRepository) {
     }
 }
 
-private fun Route.register(repository: UsersRepository) {
+private fun Route.registerController(repository: UsersRepository) {
     post(REGISTER_ROUTE) {
         val userInput = call.receive<UserInput>()
         try {
@@ -359,7 +344,7 @@ private fun Route.register(repository: UsersRepository) {
 }
 
 
-private fun Route.refreshToken(repository: UsersRepository, jwtService: JWTService) {
+private fun Route.refreshTokenController(repository: UsersRepository, jwtService: JWTService) {
     get(REFRESH_TOKEN) {
         val parameters = call.parameters
         val refreshToken = parameters[PARAM_REFRESH_TOKEN] ?: return@get call.respond(
@@ -450,7 +435,7 @@ private fun cleanupTokens(jwtService: JWTService, userRefreshTokens: MutableList
     }
 }
 
-private fun Route.verifyAccount(repository: UsersRepository) {
+private fun Route.verifyAccountController(repository: UsersRepository) {
     get(VERIFY_ROUTE) {
         val id = call.parameters[Constants.PARAM_ID] ?: return@get call.respond(
             HttpStatusCode.BadRequest,
@@ -498,7 +483,7 @@ private fun Route.verifyAccount(repository: UsersRepository) {
     }
 }
 
-private fun Route.signIn(repository: UsersRepository, jwtService: JWTService) {
+private fun Route.signInController(repository: UsersRepository, jwtService: JWTService) {
     post(Constants.SIGN_IN_ROUTE) {
         val userInput = call.receive<UserInput>()
         try {
@@ -534,7 +519,7 @@ private fun Route.signIn(repository: UsersRepository, jwtService: JWTService) {
     }
 }
 
-private fun Route.feedback(repository: UsersRepository) {
+private fun Route.feedbackController(repository: UsersRepository) {
     post(FEEDBACK_ROUTE) {
         val feedbackMessage = call.receive<FeedbackMessage>()
         try {

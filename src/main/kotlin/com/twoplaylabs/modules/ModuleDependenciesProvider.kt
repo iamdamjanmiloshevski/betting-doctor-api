@@ -22,36 +22,19 @@
  * SOFTWARE.
  */
 
-package com.twoplaylabs
+package com.twoplaylabs.modules
 
-import com.google.auth.oauth2.GoogleCredentials
-import com.google.firebase.FirebaseApp
-import com.google.firebase.FirebaseOptions
-import com.twoplaylabs.modules.doctorbetting.doctorBettingModule
-import com.twoplaylabs.modules.sportsanalyst.sportsAnalystModule
-import io.ktor.server.engine.*
-import io.ktor.server.netty.*
-import com.twoplaylabs.util.AuthUtil.retrieveFirebaseCredentials
-import com.twoplaylabs.util.Constants
-import com.twoplaylabs.util.Constants.PORT
-import com.twoplaylabs.util.toInputStream
-import io.ktor.application.*
-import io.ktor.features.*
+import com.twoplaylabs.auth.JWTService
+import com.twoplaylabs.repository.BettingTipsRepositoryImpl
+import com.twoplaylabs.repository.UsersRepositoryImpl
 
-
-fun main() {
-    val httpPort = System.getenv(PORT)?.toInt() ?: 8080
-    embeddedServer(Netty, port = httpPort) {
-        install(CallLogging)
-        doctorBettingModule()
-        sportsAnalystModule()
-    }.start(wait = true)
-}
-
-fun configureFirebase() {
-    val options = FirebaseOptions.builder()
-        .setCredentials(GoogleCredentials.fromStream(retrieveFirebaseCredentials().toInputStream()))
-        .setStorageBucket(System.getenv(Constants.FIREBASE_STORAGE_BUCKET_URL))
-        .build()
-    FirebaseApp.initializeApp(options)
+/*
+    Author: Damjan Miloshevski 
+    Created on 13/12/2021
+    Project: betting-doctor
+*/
+object ModuleDependenciesProvider {
+     val bettingTipsRepository = BettingTipsRepositoryImpl()
+     val usersRepository = UsersRepositoryImpl()
+     val jwtService = JWTService()
 }

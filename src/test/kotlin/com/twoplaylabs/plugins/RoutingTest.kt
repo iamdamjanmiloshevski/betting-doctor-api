@@ -1,6 +1,6 @@
 package com.twoplaylabs.plugins
 
-import com.twoplaylabs.routes.convertIfSoccer
+import com.twoplaylabs.controllers.convertIfSoccer
 import junit.framework.Assert.assertEquals
 import org.junit.Test
 
