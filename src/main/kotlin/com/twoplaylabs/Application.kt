@@ -43,6 +43,7 @@ fun main() {
     val httpPort = System.getenv(PORT)?.toInt() ?: 8080
     embeddedServer(Netty, port = httpPort) {
         install(CallLogging)
+        install(DefaultHeaders)
         doctorBettingModule()
         sportsAnalystModule()
     }.start(wait = true)

@@ -3,9 +3,10 @@ val kotlinVersion: String by project
 val logbackVersion: String by project
 val kmongoVersion: String by project
 val bcryptVersion: String by project
-val apacheCommonsEmailVersion:String by project
-val mongodbDriverVersion:String by project
-val firebaseAdminVersion:String by project
+val apacheCommonsEmailVersion: String by project
+val mongodbDriverVersion: String by project
+val firebaseAdminVersion: String by project
+val koinVersion: String by project
 
 plugins {
     application
@@ -21,7 +22,7 @@ application {
 }
 
 tasks.create("stage") {
-    dependsOn("clean","installDist")
+    dependsOn("clean", "installDist")
 }
 
 repositories {
@@ -48,6 +49,7 @@ dependencies {
     implementation("org.apache.commons:commons-email:$apacheCommonsEmailVersion")
     implementation("org.mongodb:mongodb-driver-sync:$mongodbDriverVersion")
     implementation("com.google.firebase:firebase-admin:$firebaseAdminVersion")
-
+    implementation("io.insert-koin:koin-core:$koinVersion")
+    implementation("io.insert-koin:koin-logger-slf4j:$koinVersion")
     testImplementation("io.ktor:ktor-server-tests:$ktorVersion")
 }
