@@ -34,6 +34,7 @@ object Constants {
     private const val API_PREFIX = "/api/v1"
     const val BETTING_TIPS_COLLECTION = "betting-tips"
     const val USERS_COLLECTION = "users"
+    const val TICKETS_COLLECTION = "tickets"
     const val FEEDBACKS_COLLECTION = "feedbacks"
     const val WELCOME = "Welcome to Betting Doctor!"
     const val PASSWORD_HASH_COST = 16

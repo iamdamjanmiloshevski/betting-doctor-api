@@ -26,6 +26,7 @@ package com.twoplaylabs.repository
 
 
 import com.twoplaylabs.data.BettingTip
+import com.twoplaylabs.data.Ticket
 import org.litote.kmongo.*
 import java.util.*
 

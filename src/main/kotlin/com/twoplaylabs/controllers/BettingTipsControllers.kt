@@ -119,13 +119,12 @@ private fun Route.getOlderTipsBySportController(repository: BettingTipsRepositor
         val sport = call.parameters[Constants.PARAM_SPORT] ?: return@get call.respond(
             HttpStatusCode.BadRequest, Message(Constants.MISSING_SPORT, HttpStatusCode.BadRequest.value)
         )
-        val tips = repository.findBettingTipsBySport(
-            sport.convertIfSoccer()
-                .replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }, false
-        )
-        call.respond(HttpStatusCode.OK, tips)
         try {
-
+            val tips = repository.findBettingTipsBySport(
+                sport.convertIfSoccer()
+                    .replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }, false
+            )
+            call.respond(HttpStatusCode.OK, tips)
         } catch (e: Throwable) {
             application.log.error(e.message)
             call.respond(

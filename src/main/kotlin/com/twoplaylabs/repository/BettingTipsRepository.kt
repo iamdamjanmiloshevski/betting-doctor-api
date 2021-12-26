@@ -25,26 +25,28 @@
 package com.twoplaylabs.repository
 
 import com.twoplaylabs.data.BettingTip
+import com.twoplaylabs.data.Ticket
 import com.twoplaylabs.data.User
 import org.bson.BsonObjectId
 import org.bson.BsonValue
+import java.util.*
 
 /*
     Author: Damjan Miloshevski 
     Created on 18/06/2021
+
     Project: betting-doctor
 */
 interface BettingTipsRepository {
     suspend fun insertBettingTip(bettingTip: BettingTip)
+
     suspend fun findAllBettingTips(): List<BettingTip>
     suspend fun findBettingTipById(id: String): BettingTip?
-
     suspend fun findBettingTipsBySport(sport: String, upcoming: Boolean): List<BettingTip>
 
     suspend fun updateBettingTip(bettingTip: BettingTip): Long
 
     suspend fun deleteAllBettingTips(): Long
-
     suspend fun deleteBettingTip(id: String): Long
 
 

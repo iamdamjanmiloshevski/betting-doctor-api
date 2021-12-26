@@ -26,11 +26,13 @@ package com.twoplaylabs.repository
 
 import com.twoplaylabs.data.BettingTip
 import com.twoplaylabs.data.FeedbackMessage
+import com.twoplaylabs.data.Ticket
 import com.twoplaylabs.data.User
 import com.twoplaylabs.util.Constants
 import com.twoplaylabs.util.Constants.BETTING_TIPS_COLLECTION
 import com.twoplaylabs.util.Constants.DB_CONNECTION_URL
 import com.twoplaylabs.util.Constants.FEEDBACKS_COLLECTION
+import com.twoplaylabs.util.Constants.TICKETS_COLLECTION
 import com.twoplaylabs.util.Constants.USERS_COLLECTION
 import org.litote.kmongo.KMongo
 import org.litote.kmongo.getCollection
@@ -46,4 +48,5 @@ abstract class BaseRepository {
     protected val bettingTipsCollection = database.getCollection<BettingTip>(BETTING_TIPS_COLLECTION)
     protected val usersCollection = database.getCollection<User>(USERS_COLLECTION)
     protected val feedbacksCollection = database.getCollection<FeedbackMessage>(FEEDBACKS_COLLECTION)
+    protected val ticketsCollection = database.getCollection<Ticket>(TICKETS_COLLECTION)
 }

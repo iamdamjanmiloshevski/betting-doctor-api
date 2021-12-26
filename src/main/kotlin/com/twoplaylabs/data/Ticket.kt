@@ -22,28 +22,19 @@
  * SOFTWARE.
  */
 
-package com.twoplaylabs.modules.doctorbetting
+package com.twoplaylabs.data
 
-import com.twoplaylabs.configureFirebase
-import com.twoplaylabs.modules.ModuleDependenciesProvider.bettingTipsRepository
-import com.twoplaylabs.modules.ModuleDependenciesProvider.jwtService
-import com.twoplaylabs.modules.ModuleDependenciesProvider.usersRepository
-import com.twoplaylabs.plugins.configureErrorHandling
-import com.twoplaylabs.plugins.configureDoctorBettingControllers
-import com.twoplaylabs.plugins.configureSecurity
-import com.twoplaylabs.plugins.configureSerialization
-
-import io.ktor.application.*
+import kotlinx.serialization.SerialName
+import java.util.*
 
 /*
     Author: Damjan Miloshevski 
-    Created on 13/12/2021
+    Created on 25/12/2021
     Project: betting-doctor
 */
-fun Application.doctorBettingModule(){
-    configureFirebase()
-    configureSecurity(jwtService, usersRepository)
-    configureDoctorBettingControllers(bettingTipsRepository, usersRepository, jwtService)
-    configureErrorHandling()
-    configureSerialization()
-}
+data class Ticket(
+    @SerialName("_id")
+    var _id: String,
+    var date:Date,
+    val tips: List<BettingTip>
+)

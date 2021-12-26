@@ -22,28 +22,26 @@
  * SOFTWARE.
  */
 
-package com.twoplaylabs.modules.doctorbetting
+package com.twoplaylabs.repository
 
-import com.twoplaylabs.configureFirebase
-import com.twoplaylabs.modules.ModuleDependenciesProvider.bettingTipsRepository
-import com.twoplaylabs.modules.ModuleDependenciesProvider.jwtService
-import com.twoplaylabs.modules.ModuleDependenciesProvider.usersRepository
-import com.twoplaylabs.plugins.configureErrorHandling
-import com.twoplaylabs.plugins.configureDoctorBettingControllers
-import com.twoplaylabs.plugins.configureSecurity
-import com.twoplaylabs.plugins.configureSerialization
-
-import io.ktor.application.*
+import com.twoplaylabs.data.Ticket
+import java.util.*
 
 /*
     Author: Damjan Miloshevski 
-    Created on 13/12/2021
+    Created on 25/12/2021
     Project: betting-doctor
 */
-fun Application.doctorBettingModule(){
-    configureFirebase()
-    configureSecurity(jwtService, usersRepository)
-    configureDoctorBettingControllers(bettingTipsRepository, usersRepository, jwtService)
-    configureErrorHandling()
-    configureSerialization()
+interface TicketsRepository {
+    suspend fun insertTicket(ticket: Ticket)
+
+    suspend fun findAllTickets():List<Ticket>
+    suspend fun findTicketById(id:String):Ticket?
+    suspend fun findTicketByDate(date: Date):Ticket?
+
+    suspend fun updateTicket(ticket: Ticket):Long
+
+    suspend fun deleteAllTickets():Long
+    suspend fun deleteTicket(id:String):Long
+    suspend fun deleteTicket(date: Date):Long
 }

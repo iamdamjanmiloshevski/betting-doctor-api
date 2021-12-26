@@ -45,5 +45,7 @@ data class BettingTip(
     var result: String,
     @SerialName("_id")
     var _id: String,
-    var sport: String
+    var sport: String,
+    val coefficient:String? =null,
+    var ticketId:String? = null
 )
