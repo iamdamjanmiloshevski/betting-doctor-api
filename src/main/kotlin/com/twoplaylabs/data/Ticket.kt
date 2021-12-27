@@ -36,5 +36,5 @@ data class Ticket(
     @SerialName("_id")
     var _id: String,
     var date:Date,
-    val tips: List<BettingTip>
+    var tips: List<BettingTip>
 )

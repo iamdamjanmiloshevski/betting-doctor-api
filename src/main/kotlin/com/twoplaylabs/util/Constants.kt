@@ -62,6 +62,8 @@ object Constants {
     const val FEEDBACK_ROUTE = "/feedback"
     const val REFRESH_TOKEN = "/tokens/refresh-token/{refreshToken}"
     const val PUSH_NOTIFICATIONS = "/notifications/{topic}"
+    const val TICKETS_ROUTE = "/api/v1/betting-tickets"
+    const val SEARCH_ROUTE = "/search"
     //endregion
 
     //region https messages
@@ -100,6 +102,7 @@ object Constants {
     //region params
     const val PARAM_SPORT = "sport"
     const val PARAM_ID = "id"
+    const val PARAM_DATE = "date"
     const val PARAM_REFRESH_TOKEN = "refreshToken"
     //endregion
 

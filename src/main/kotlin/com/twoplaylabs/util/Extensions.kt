@@ -25,6 +25,8 @@
 package com.twoplaylabs.util
 
 import com.twoplaylabs.data.UserRole
+import java.text.SimpleDateFormat
+import java.util.*
 
 /*
     Author: Damjan Miloshevski 
@@ -32,9 +34,21 @@ import com.twoplaylabs.data.UserRole
     Project: betting-doctor
 */
 fun String.toUserRole(): UserRole {
-    return when(this){
+    return when (this) {
         "ADMIN" -> UserRole.ADMIN
         "CUSTOMER" -> UserRole.CUSTOMER
         else -> throw Exception("Unknown user role!")
     }
+}
+
+fun Date.addDays(amount: Int): Date {
+    val calendar = Calendar.getInstance()
+    calendar.time = this
+    calendar.add(Calendar.DAY_OF_WEEK, amount)
+    return calendar.time
+}
+
+fun String.toDateFromQueryParam(): Date {
+    val sdf = SimpleDateFormat("dd-MM-yyyy", Locale.getDefault())
+    return sdf.parse(this)
 }

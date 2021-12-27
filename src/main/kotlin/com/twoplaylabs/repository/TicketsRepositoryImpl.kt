@@ -25,7 +25,9 @@
 package com.twoplaylabs.repository
 
 import com.twoplaylabs.data.Ticket
+import com.twoplaylabs.util.addDays
 import org.litote.kmongo.*
+import java.text.SimpleDateFormat
 import java.util.*
 
 /*
@@ -33,13 +35,13 @@ import java.util.*
     Created on 25/12/2021
     Project: betting-doctor
 */
-class TicketsRepositoryImpl:BaseRepository(),TicketsRepository {
+class TicketsRepositoryImpl : BaseRepository(), TicketsRepository {
     override suspend fun insertTicket(ticket: Ticket) {
         ticketsCollection.insertOne(ticket)
     }
 
     override suspend fun findAllTickets(): List<Ticket> {
-       val tickets = ticketsCollection.find()
+        val tickets = ticketsCollection.find()
         return tickets.toList()
     }
 
@@ -48,14 +50,15 @@ class TicketsRepositoryImpl:BaseRepository(),TicketsRepository {
     }
 
     override suspend fun findTicketByDate(date: Date): Ticket? {
-        return ticketsCollection.findOne(Ticket::date eq date)
+        return ticketsCollection.findOne(Ticket::date gte date, Ticket::date lte date.addDays(1))
     }
 
     override suspend fun updateTicket(ticket: Ticket): Long {
-        val request = ticketsCollection.updateOne(Ticket::_id eq ticket._id, set(
-            Ticket::tips setTo ticket.tips,
-            Ticket::date setTo ticket.date
-        )
+        val request = ticketsCollection.updateOne(
+            Ticket::_id eq ticket._id, set(
+                Ticket::tips setTo ticket.tips,
+                Ticket::date setTo ticket.date
+            )
         )
         return request.modifiedCount
     }
@@ -66,12 +69,12 @@ class TicketsRepositoryImpl:BaseRepository(),TicketsRepository {
     }
 
     override suspend fun deleteTicket(id: String): Long {
-        val result =  ticketsCollection.deleteOne(Ticket::_id eq id)
+        val result = ticketsCollection.deleteOne(Ticket::_id eq id)
         return result.deletedCount
     }
 
     override suspend fun deleteTicket(date: Date): Long {
-        val result =  ticketsCollection.deleteOne(Ticket::date eq date)
+        val result = ticketsCollection.deleteOne(Ticket::date eq date)
         return result.deletedCount
     }
 }
