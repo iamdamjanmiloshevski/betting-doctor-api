@@ -44,9 +44,17 @@ Hosted by Heroku
     - @PUT^ **{{api_url}}/betting-tips** Update betting tip (requires JSON object in the BODY)
     - @DELETE^ **{{api_url}}/betting-tips/{id}** Delete betting tip by id
     - @DELETE^ **{{api_url}}/betting-tips** Delete all betting tips
-   
 
-2. Users
+2. Betting tickets
+   - @POST^ **{{api_url}}/betting-tickets** Save betting ticket (requires JSON object in the BODY)
+   - @GET  **{{api_url}}/betting-tickets** Get betting tickets
+   - @GET **{{api_url}}/betting-tickets/{id}** Get betting ticket by id
+   - @GET **{{api_url}}/betting-tickets/search?date={date}** Get ticket by date
+   - @PUT^ **{{api_url}}/betting-tickets** Update betting tip (requires JSON object in the BODY)
+   - @DELETE^ **{{api_url}}/betting-tickets/{id}** Delete betting tip by id
+   - @DELETE^ **{{api_url}}/betting-tickets** Delete all betting tips
+
+3. Users
     - @POST **{{api_url}}/users/signin** Sign in user (requires JSON object in the BODY)
     - @POST **{{api_url}}/users/register** Register user (requires JSON object in the BODY)
     - @POST **{{api_url}}/users/signout** Signout a user (requires JSON object in the BODY)
