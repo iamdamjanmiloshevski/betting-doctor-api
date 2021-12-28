@@ -35,6 +35,7 @@ import com.twoplaylabs.util.BettingTipManager.fetchTeamLogosAndUpdateBettingTip
 import com.twoplaylabs.util.Constants
 import com.twoplaylabs.util.Constants.ID_ROUTE
 import com.twoplaylabs.util.Constants.PARAM_DATE
+import com.twoplaylabs.util.Constants.PARAM_ID
 import com.twoplaylabs.util.Constants.SEARCH_ROUTE
 import com.twoplaylabs.util.Constants.TICKETS_ROUTE
 import com.twoplaylabs.util.toDateFromQueryParam
@@ -130,7 +131,7 @@ fun Route.findTicketByDate(repository: TicketsRepository) {
 
 fun Route.getTicketById(repository: TicketsRepository) {
     get(ID_ROUTE) {
-        val id = call.parameters["id"] ?: call.respond(
+        val id = call.parameters[PARAM_ID] ?: call.respond(
             HttpStatusCode.BadRequest,
             Message("Please provide a valid id", HttpStatusCode.BadRequest.value)
         )
@@ -196,7 +197,7 @@ fun Route.updateTicket(repository: TicketsRepository) {
 }
 
 fun Route.deleteTicket(repository: TicketsRepository) {
-    delete("{id}") {
+    delete(ID_ROUTE) {
         val id = call.parameters[Constants.PARAM_ID] ?: return@delete call.respond(
             HttpStatusCode.BadRequest,
             Message(Constants.MISSING_ID, HttpStatusCode.BadRequest.value)

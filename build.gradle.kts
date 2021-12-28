@@ -16,7 +16,7 @@ plugins {
 }
 
 group = "com.twoplaylabs"
-version = "1.0.5"
+version = "1.1.0"
 application {
     mainClass.set("com.twoplaylabs.ApplicationKt")
 }
