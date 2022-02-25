@@ -66,8 +66,8 @@ object TeamImageProvider {
     fun generateImageName(team: Team, sport: String): String {
         val name = team.name.replace("\\s+".toRegex(), "")
         return when (sport) {
-            "Soccer", "soccer" -> "football/".plus(name).plus(".jpeg")
-            else -> sport.lowercase(Locale.getDefault()).plus("/").plus(name).plus(".jpeg")
+            "Soccer", "soccer" -> "football/".plus(name).plus(".jpg")
+            else -> sport.lowercase(Locale.getDefault()).plus("/").plus(name).plus(".jpg")
         }
     }
 
@@ -76,7 +76,7 @@ object TeamImageProvider {
         val blobInfo = generateImageBlobInfo(teamName)
         bucket.create(blobInfo.name, bais, Bucket.BlobWriteOption.doesNotExist())
         val fileUrl = bucket.get(blobInfo.name).signUrl(IMAGE_LINK_VALIDATION_DAYS, TimeUnit.DAYS)
-        println("Uploaded to ${fileUrl}")
+        println("Uploaded to $fileUrl")
         return fileUrl.toString()
     }
 

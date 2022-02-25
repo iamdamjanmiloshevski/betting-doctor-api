@@ -37,6 +37,13 @@ import com.twoplaylabs.util.Constants.PORT
 import com.twoplaylabs.util.toInputStream
 import io.ktor.application.*
 import io.ktor.features.*
+import io.ktor.html.*
+import io.ktor.http.*
+import io.ktor.routing.*
+import kotlinx.html.body
+import kotlinx.html.h1
+import kotlinx.html.head
+import kotlinx.html.title
 
 
 fun main() {
@@ -44,6 +51,34 @@ fun main() {
     embeddedServer(Netty, port = httpPort) {
         install(CallLogging)
         install(DefaultHeaders)
+        routing {
+            get("/"){
+                val name = "Betting Doctor"
+                call.respondHtml(HttpStatusCode.OK){
+                    head {
+                        title { +name }
+                    }
+                    body {
+                        h1 {
+                            + "Doctor Betting API health check: Success"
+                        }
+                    }
+                }
+            }
+            get("/health-check"){
+                val name = "Betting Doctor"
+                call.respondHtml(HttpStatusCode.OK){
+                    head {
+                        title { +name }
+                    }
+                    body {
+                        h1 {
+                            + "Health check: Success"
+                        }
+                    }
+                }
+            }
+        }
         doctorBettingModule()
         sportsAnalystModule()
     }.start(wait = true)

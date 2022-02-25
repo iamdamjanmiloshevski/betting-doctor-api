@@ -24,9 +24,11 @@
 
 package com.twoplaylabs.common
 
+import java.util.*
+
 /*
     Author: Damjan Miloshevski 
     Created on 25/06/2021
     Project: betting-doctor
 */
-data class Message(val message: String, val code: Int)
+data class Message(val message: String, val code: Int,val date: Date = Date())

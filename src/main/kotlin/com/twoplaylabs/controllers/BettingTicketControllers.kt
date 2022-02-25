@@ -30,7 +30,6 @@ import com.twoplaylabs.data.Ticket
 import com.twoplaylabs.data.User
 import com.twoplaylabs.data.UserRole
 import com.twoplaylabs.repository.TicketsRepository
-import com.twoplaylabs.util.BettingTipManager
 import com.twoplaylabs.util.BettingTipManager.fetchTeamLogosAndUpdateBettingTip
 import com.twoplaylabs.util.Constants
 import com.twoplaylabs.util.Constants.ID_ROUTE
@@ -77,46 +76,51 @@ fun Route.createTicket(repository: TicketsRepository) {
                 HttpStatusCode.Unauthorized,
                 Message(Constants.INSUFFICIENT_PERMISSIONS, HttpStatusCode.Unauthorized.value)
             )
-        }
-        val ticket = call.receive<Ticket>()
-        try {
-            val ticketId = ObjectId()
-            val updatedTips = mutableListOf<BettingTip>()
-            for(tip in ticket.tips){
-                fetchTeamLogosAndUpdateBettingTip(tip,callback={
-                    updatedTips.add(it)
-                })
+        }else{
+            val ticket = call.receive<Ticket>()
+            try {
+                val ticketId = ObjectId()
+                val updatedTips = mutableListOf<BettingTip>()
+                for (tip in ticket.tips) {
+                    fetchTeamLogosAndUpdateBettingTip(tip, callback = {
+                        updatedTips.add(it)
+                    })
+                }
+                ticket.tips = updatedTips
+                for (tip in ticket.tips) {
+                    tip._id = ObjectId().toString()
+                    tip.ticketId = ticketId.toString()
+                }
+                ticket._id = ticketId.toString()
+                ticket.date = Date()
+                repository.insertTicket(ticket)
+                call.respond(HttpStatusCode.Created, ticket)
+            } catch (e: Throwable) {
+                application.log.error(e.message)
+                call.respond(
+                    HttpStatusCode.BadRequest,
+                    Message(Constants.SOMETHING_WENT_WRONG, HttpStatusCode.BadRequest.value)
+                )
             }
-            ticket.tips = updatedTips
-            for (tip in ticket.tips) {
-                tip._id = ObjectId().toString()
-                tip.ticketId = ticketId.toString()
-            }
-            ticket._id = ticketId.toString()
-            ticket.date = Date()
-            repository.insertTicket(ticket)
-            call.respond(HttpStatusCode.Created, ticket)
-        } catch (e: Throwable) {
-            application.log.error(e.message)
-            call.respond(
-                HttpStatusCode.BadRequest,
-                Message(Constants.SOMETHING_WENT_WRONG, HttpStatusCode.BadRequest.value)
-            )
         }
     }
 }
 
 fun Route.findTicketByDate(repository: TicketsRepository) {
     get(SEARCH_ROUTE) {
-        val date = call.request.queryParameters[PARAM_DATE]
+        val dateParam = call.request.queryParameters[PARAM_DATE]
         try {
-            date ?: call.respond(
+            dateParam ?: call.respond(
                 HttpStatusCode.BadRequest,
                 Message("Please provide a valid date", HttpStatusCode.BadRequest.value)
             )
-            date?.let { gmtDate ->
-                val ticket = repository.findTicketByDate(gmtDate.toDateFromQueryParam())
-                ticket?.let { call.respond(HttpStatusCode.OK, ticket) } ?: call.respond(HttpStatusCode.NotFound)
+            dateParam?.let { gmtDate ->
+                val date = gmtDate.toDateFromQueryParam()
+                val ticket = repository.findTicketByDate(date)
+                ticket?.let { call.respond(HttpStatusCode.OK, ticket) } ?: call.respond(
+                    HttpStatusCode.NotFound,
+                    Message("Apologies we have nothing for you", HttpStatusCode.NoContent.value, date)
+                )
             } ?: call.respond(HttpStatusCode.InternalServerError)
 
         } catch (e: Throwable) {
@@ -171,27 +175,29 @@ fun Route.updateTicket(repository: TicketsRepository) {
                 HttpStatusCode.Unauthorized,
                 Message(Constants.INSUFFICIENT_PERMISSIONS, HttpStatusCode.Unauthorized.value)
             )
-        }
-        val ticket = call.receive<Ticket>()
-        try {
-            val updatedTips = mutableListOf<BettingTip>()
-            for(tip in ticket.tips){
-                fetchTeamLogosAndUpdateBettingTip(tip,callback={
-                    updatedTips.add(it)
-                })
+        }else{
+            val ticket = call.receive<Ticket>()
+            try {
+                val updatedTips = mutableListOf<BettingTip>()
+                for (tip in ticket.tips) {
+                    if(tip._id == null) tip._id = ObjectId().toString()
+                    fetchTeamLogosAndUpdateBettingTip(tip, callback = {
+                        updatedTips.add(it)
+                    })
+                }
+                ticket.tips = updatedTips
+                val updatedCount = repository.updateTicket(ticket)
+                application.log.debug("Updated documents $updatedCount")
+                if (updatedCount > 0) {
+                    call.respond(HttpStatusCode.Accepted, ticket)
+                } else call.respond(HttpStatusCode.NoContent)
+            } catch (e: Throwable) {
+                application.log.error(e.message)
+                call.respond(
+                    HttpStatusCode.BadRequest,
+                    Message(Constants.SOMETHING_WENT_WRONG, HttpStatusCode.BadRequest.value)
+                )
             }
-            ticket.tips = updatedTips
-            val updatedCount = repository.updateTicket(ticket)
-            application.log.debug("Updated documents $updatedCount")
-            if (updatedCount > 0) {
-                call.respond(HttpStatusCode.Accepted, ticket)
-            } else call.respond(HttpStatusCode.NoContent)
-        } catch (e: Throwable) {
-            application.log.error(e.message)
-            call.respond(
-                HttpStatusCode.BadRequest,
-                Message(Constants.SOMETHING_WENT_WRONG, HttpStatusCode.BadRequest.value)
-            )
         }
     }
 }
