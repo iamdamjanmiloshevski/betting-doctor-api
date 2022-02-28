@@ -72,10 +72,9 @@ object TeamImageProvider {
     }
 
     private fun saveImageToFirebaseAndReturnUrl(teamName: String, byteArray: ByteArray): String {
-        val bais = ByteArrayInputStream(byteArray)
         val blobInfo = generateImageBlobInfo(teamName)
-        bucket.create(blobInfo.name, bais, Bucket.BlobWriteOption.doesNotExist())
-        val fileUrl = bucket.get(blobInfo.name).signUrl(IMAGE_LINK_VALIDATION_DAYS, TimeUnit.DAYS)
+        bucket.storage.create(blobInfo,byteArray, Storage.BlobTargetOption.doesNotExist())
+        val fileUrl = bucket.storage.get(blobInfo.blobId).signUrl(IMAGE_LINK_VALIDATION_DAYS, TimeUnit.DAYS)
         println("Uploaded to $fileUrl")
         return fileUrl.toString()
     }
@@ -98,5 +97,7 @@ object TeamImageProvider {
     }
 
     private fun generateImageBlobInfo(name: String): BlobInfo =
-        BlobInfo.newBuilder(BlobId.of(bucket.name, name)).setContentType("image/jpeg").build()
+        BlobInfo.newBuilder(BlobId.of(bucket.name, name))
+            .setMetadata(mapOf("contentType" to "image/jpeg"))
+            .setContentType("image/jpeg").build()
 }
