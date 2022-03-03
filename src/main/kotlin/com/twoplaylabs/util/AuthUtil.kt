@@ -62,13 +62,14 @@ object AuthUtil {
         expiresAt: Date = jwtService.expiresAt()
     ): AccessToken {
         val expiresAtInMillis = expiresAt.time
-        val refreshTokenExpiresAt = Date(expiresAt.time + TimeUnit.DAYS.toMillis(30))
         return AccessToken(
             jwtService.generateToken(expiresAt, user),
-            jwtService.generateRefreshToken(refreshTokenExpiresAt, user),
+            UUID.randomUUID().toString(),
             expiresAtInMillis
         )
     }
+
+
 
     fun retrieveFirebaseCredentials(): FirebaseCredentials {
         val serviceAccount = System.getenv(FIREBASE_TYPE)

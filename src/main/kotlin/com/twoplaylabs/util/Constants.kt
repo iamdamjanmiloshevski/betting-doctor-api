@@ -60,7 +60,7 @@ object Constants {
     const val VERIFY_ROUTE = "/verify/{id}"
     const val SIGN_OUT_ROUTE = "/signout"
     const val FEEDBACK_ROUTE = "/feedback"
-    const val REFRESH_TOKEN = "/tokens/refresh-token/{refreshToken}"
+    const val REFRESH_TOKEN = "/token"
     const val PUSH_NOTIFICATIONS = "/notifications/{topic}"
     const val TICKETS_ROUTE = "/api/v1/betting-tickets"
     const val SEARCH_ROUTE = "/search"

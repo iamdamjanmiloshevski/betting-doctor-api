@@ -28,15 +28,14 @@ import at.favre.lib.crypto.bcrypt.BCrypt
 import com.google.firebase.messaging.FirebaseMessaging
 import com.twoplaylabs.auth.JWTService
 import com.twoplaylabs.common.Message
-import com.twoplaylabs.data.FeedbackMessage
-import com.twoplaylabs.data.User
-import com.twoplaylabs.data.UserInput
+import com.twoplaylabs.data.*
 import com.twoplaylabs.repository.UsersRepository
 import com.twoplaylabs.util.AuthUtil.generateAccessToken
 import com.twoplaylabs.util.AuthUtil.generateWelcomeUrl
 import com.twoplaylabs.util.AuthUtil.isRefreshTokenValid
 import com.twoplaylabs.util.Constants
 import com.twoplaylabs.util.Constants.ACCOUNT_VERIFIED_MSG
+import com.twoplaylabs.util.Constants.AUTH_CONFIG_ADMIN
 import com.twoplaylabs.util.Constants.AUTH_CONFIG_ALL
 import com.twoplaylabs.util.Constants.CHANGE_PWD_ROUTE
 import com.twoplaylabs.util.Constants.FEEDBACK_HTML_MESSAGE
@@ -81,6 +80,9 @@ import kotlin.text.toCharArray
     Created on 25/06/2021
     Project: betting-doctor
 */
+
+private val tokens = mutableMapOf<String, MutableList<String>>()
+
 fun Route.usersController(repository: UsersRepository, jwtService: JWTService) {
     route(USERS_ROUTE) {
         authenticate(System.getenv(AUTH_CONFIG_ALL)) {
@@ -90,6 +92,9 @@ fun Route.usersController(repository: UsersRepository, jwtService: JWTService) {
             changePasswordController(repository)
             deleteUserController(repository)
             sendNotificationController()
+        }
+        authenticate(System.getenv(AUTH_CONFIG_ADMIN)) {
+            rejectTokenController()
         }
         signInController(repository, jwtService)
         registerController(repository)
@@ -343,77 +348,72 @@ private fun Route.registerController(repository: UsersRepository) {
     }
 }
 
+private fun Route.rejectTokenController() {
+    post("token/reject") {
+        val refreshToken = call.receive<RefreshToken>()
+        try {
+            val userEmail = refreshToken.userEmail
+            val token = refreshToken.token
+            if (tokens.containsKey(userEmail)) {
+                val userTokens = tokens[userEmail]
+                println(tokens)
+                userTokens?.let {
+                    if(userTokens.contains(token)){
+                        userTokens.remove(token)
+                    }
+                    println(tokens)
+                    call.respond(HttpStatusCode.OK)
+                }
+            }else {
+                call.respond(HttpStatusCode.Unauthorized)
+            }
+        } catch (e: Throwable) {
+            application.log.error(e.message)
+            call.respond(
+                HttpStatusCode.BadRequest,
+                Message(Constants.SOMETHING_WENT_WRONG, HttpStatusCode.BadRequest.value)
+            )
+        }
+    }
+}
 
 private fun Route.refreshTokenController(repository: UsersRepository, jwtService: JWTService) {
-    get(REFRESH_TOKEN) {
-        val parameters = call.parameters
-        val refreshToken = parameters[PARAM_REFRESH_TOKEN] ?: return@get call.respond(
-            HttpStatusCode.BadRequest,
-            Message(MISSING_REFRESH_TOKEN, HttpStatusCode.BadRequest.value)
-        )
+    post(REFRESH_TOKEN) {
+        val refreshToken = call.receive<RefreshToken>()
         try {
-            val decodedJWT = jwtService.decodeJWT(refreshToken)
-            val jwtArgs = JWTDecoder.decodeJWT(decodedJWT)
-            val payload = jwtArgs.second
-            val jti = System.getenv(JWT_ID)
-            val audience = System.getenv(JWT_AUDIENCE)
-            if (payload.jti != jti) {
-                application.log.error("Invalid JTI")
-                call.respond(
-                    HttpStatusCode.Forbidden,
-                    Message(UNABLE_TO_VERIFY_REFRESH_TOKEN, HttpStatusCode.Forbidden.value)
-                )
-            } else if (payload.aud != audience) {
-                application.log.error("Invalid AUDIENCE")
-                call.respond(
-                    HttpStatusCode.Forbidden,
-                    Message(UNABLE_TO_VERIFY_REFRESH_TOKEN, HttpStatusCode.Forbidden.value)
-                )
-            } else {
-                val user = payload.user
-                if (user.isAccountVerified) {
-                    val isTokenValid = isRefreshTokenValid(payload.exp)
-                    if (isTokenValid) {
-                        val authenticatedUser = repository.findUserById(payload.user.id)
-                        authenticatedUser?.let { authUser ->
-                            if (authUser.isAccountVerified) {
-                                val accessToken = generateAccessToken(authUser, jwtService)
-                                val userRefreshTokens = authUser.refreshTokens
-                                if (userRefreshTokens.size >= 5) {
-                                    cleanupTokens(jwtService, userRefreshTokens)
+            val userEmail = refreshToken.userEmail
+            val token = refreshToken.token
+            if (tokens.containsKey(userEmail)) {
+                val userTokens = tokens[userEmail]
+                userTokens?.let {
+                    if (it.contains(token)) {
+                        val user = repository.findUserByEmail(userEmail)
+                        user?.let { bettingDoctorUser ->
+                            if (bettingDoctorUser.isAccountVerified) {
+                                val accessToken = generateAccessToken(bettingDoctorUser, jwtService)
+                                tokens[bettingDoctorUser.email]?.let { existingTokens ->
+                                    existingTokens.add(accessToken.refreshToken)
+                                    tokens[bettingDoctorUser.email] = existingTokens
                                 }
-                                userRefreshTokens.add(accessToken.refreshToken)
-                                (0..userRefreshTokens.indexOf(accessToken.refreshToken)).forEach {
-                                    Collections.swap(userRefreshTokens, 0, it)
-                                }
-                                authUser.refreshTokens = userRefreshTokens
-                                val modifiedCount = repository.updateUser(authUser)
-                                if (modifiedCount > 0) {
-                                    call.respond(HttpStatusCode.OK, accessToken)
-                                }
-                            } else {
-                                println("User not verified")
-                                call.respond(
-                                    HttpStatusCode.Forbidden,
-                                    Message(UNABLE_TO_VERIFY_REFRESH_TOKEN, HttpStatusCode.Forbidden.value)
-                                )
-                            }
+                                println(tokens)
+                                call.respond(HttpStatusCode.OK, accessToken)
+                            } else call.respond(
+                                HttpStatusCode.Forbidden,
+                                Message(VERIFY_ACCOUNT_MSG, HttpStatusCode.Forbidden.value)
+                            )
                         } ?: call.respond(
                             HttpStatusCode.NotFound,
-                            Message(Constants.NO_USER_FOUND, HttpStatusCode.NotFound.value)
+                            Message(
+                                String.format(Constants.NO_USER_WITH_EMAIL, userEmail),
+                                HttpStatusCode.NotFound.value
+                            )
                         )
-                    } else {
-                        println("token expired")
-                        call.respond(
-                            HttpStatusCode.Forbidden,
-                            Message(UNABLE_TO_VERIFY_REFRESH_TOKEN, HttpStatusCode.Forbidden.value)
-                        )
-                    }
-                } else call.respond(
-                    HttpStatusCode.Forbidden,
-                    Message(UNABLE_TO_VERIFY_REFRESH_TOKEN, HttpStatusCode.Forbidden.value)
-                )
+                    } else call.respond(HttpStatusCode.Unauthorized)
+                } ?: call.respond(HttpStatusCode.Unauthorized)
+            } else {
+                call.respond(HttpStatusCode.Unauthorized)
             }
+
         } catch (e: Throwable) {
             application.log.error(e.message)
             call.respond(
@@ -494,9 +494,17 @@ private fun Route.signInController(repository: UsersRepository, jwtService: JWTS
                     val result = BCrypt.verifyer().verify(userInput.password.toCharArray(), hashedPassword)
                     if (result.verified) {
                         val accessToken = generateAccessToken(bettingDoctorUser, jwtService)
-                        bettingDoctorUser.refreshTokens.add(accessToken.refreshToken)
-                        val modifiedCount = repository.updateUser(bettingDoctorUser)
-                        if (modifiedCount > 0) call.respond(HttpStatusCode.OK, accessToken)
+                        val userTokens = mutableListOf<String>()
+                        if (tokens[bettingDoctorUser.email].isNullOrEmpty()) {
+                            userTokens.add(accessToken.refreshToken)
+                            tokens[bettingDoctorUser.email] = userTokens
+                        } else {
+                            tokens[bettingDoctorUser.email]?.let {
+                                it.add(accessToken.refreshToken)
+                                tokens[bettingDoctorUser.email] = it
+                            }
+                        }
+                        call.respond(HttpStatusCode.OK, accessToken)
                     } else call.respond(
                         HttpStatusCode.Forbidden,
                         Message(Constants.PWD_INCORRECT, HttpStatusCode.Forbidden.value)

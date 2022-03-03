@@ -24,22 +24,9 @@
 
 package com.twoplaylabs.data
 
-import io.ktor.auth.*
-import kotlinx.serialization.SerialName
-
 /*
     Author: Damjan Miloshevski 
-    Created on 20/06/2021
+    Created on 03/03/2022
     Project: betting-doctor
 */
-data class User(
-    @SerialName("_id")
-    val _id: String,
-    var name: String,
-    var surname: String="",
-    var avatarUrl: String?="",
-    var email: String="",
-    var hashedPassword: String="",
-    var isAccountVerified:Boolean = false,
-    var role:UserRole = UserRole.CUSTOMER
-):Principal
+data class RefreshToken(val token:String,val userEmail:String)

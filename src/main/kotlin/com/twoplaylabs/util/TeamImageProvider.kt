@@ -45,14 +45,13 @@ import kotlin.math.ceil
 */
 object TeamImageProvider {
     private val bucket = StorageClient.getInstance().bucket()
-    val IMAGE_LINK_VALIDATION_DAYS = ceil((20 * 365).toDouble()).toLong()
 
     suspend fun getTeamImageUrl(team: Team, sport: String, sportsApiData: SportsApiData): String {
         val imageName = generateImageName(team, sport)
         val blobInfo = generateImageBlobInfo(imageName)
         val blob = bucket.get(blobInfo.name, Storage.BlobGetOption.shouldReturnRawInputStream(false))
         return if (blob != null) {
-            val url = bucket.get(imageName).signUrl(IMAGE_LINK_VALIDATION_DAYS, TimeUnit.DAYS).toString()
+            val url = bucket.get(imageName).signUrl(7, TimeUnit.DAYS, Storage.SignUrlOption.withV4Signature()).toString()
             println("Image exists. Returning existing url $url")
             url
         } else {
@@ -73,9 +72,9 @@ object TeamImageProvider {
 
     private fun saveImageToFirebaseAndReturnUrl(teamName: String, byteArray: ByteArray): String {
         val blobInfo = generateImageBlobInfo(teamName)
-        bucket.storage.create(blobInfo,byteArray, Storage.BlobTargetOption.doesNotExist())
-        val fileUrl = bucket.storage.get(blobInfo.blobId).signUrl(IMAGE_LINK_VALIDATION_DAYS, TimeUnit.DAYS)
-        println("Uploaded to $fileUrl")
+        bucket.storage.create(blobInfo, byteArray, Storage.BlobTargetOption.doesNotExist())
+        val fileUrl = bucket.storage.get(blobInfo.blobId)
+            .signUrl(7, TimeUnit.DAYS, Storage.SignUrlOption.withV4Signature())
         return fileUrl.toString()
     }
 
@@ -89,7 +88,7 @@ object TeamImageProvider {
             do {
                 val currentRead = it.content.readAvailable(byteArray, offset, byteArray.size)
                 offset += currentRead
-                println("Download in progress, offset: ${offset}, current read ${currentRead} / ${contentLength}")
+                println("Download in progress, offset: ${offset}, current read $currentRead / $contentLength")
             } while (offset < contentLength)
             println("Download done")
             return@execute byteArray

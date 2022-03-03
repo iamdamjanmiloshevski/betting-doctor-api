@@ -56,8 +56,7 @@ class UsersRepositoryImpl :UsersRepository,BaseRepository() {
             set(
                 User::name setTo user.name,
                 User::surname setTo user.surname,
-                User::avatarUrl setTo user.avatarUrl,
-                User::refreshTokens setTo user.refreshTokens
+                User::avatarUrl setTo user.avatarUrl
             )
         )
         return request.modifiedCount

@@ -68,9 +68,6 @@ class JWTService {
         .sign(algorithm)
 
     fun generateRefreshToken(expiresAt: Date, user: User): String = JWT.create()
-        .withIssuer(issuer)
-        .withAudience(audience)
-        .withJWTId(System.getenv(JWT_ID))
         .withClaim(
             USER, mapOf(
                 ID to user._id,
