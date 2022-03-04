@@ -31,17 +31,19 @@ import com.twoplaylabs.repository.UsersRepository
 import com.twoplaylabs.controllers.bettingTipsController
 import com.twoplaylabs.controllers.usersController
 import com.twoplaylabs.repository.TicketsRepository
+import com.twoplaylabs.repository.TokensRepository
 import io.ktor.routing.*
 import io.ktor.application.*
 
 fun Application.configureDoctorBettingControllers(
     bettingTipsRepository: BettingTipsRepository,
     usersRepository: UsersRepository,
+    tokensRepository: TokensRepository,
     jwtService: JWTService
 ) {
     routing {
         bettingTipsController(bettingTipsRepository)
-        usersController(usersRepository, jwtService)
+        usersController(usersRepository, tokensRepository,jwtService)
 
     }
 }

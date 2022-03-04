@@ -35,11 +35,9 @@ import com.twoplaylabs.util.Constants.AUTHENTICATION
 import com.twoplaylabs.util.Constants.ID
 import com.twoplaylabs.util.Constants.IS_ACCOUNT_VERIFIED
 import com.twoplaylabs.util.Constants.JWT_AUDIENCE
-import com.twoplaylabs.util.Constants.JWT_ID
 import com.twoplaylabs.util.Constants.JWT_SECRET
 import com.twoplaylabs.util.Constants.ROLE
 import com.twoplaylabs.util.Constants.USER
-import com.twoplaylabs.util.GsonUtil
 
 /*
     Author: Damjan Miloshevski 
@@ -67,22 +65,10 @@ class JWTService {
         .withExpiresAt(expiresAt)
         .sign(algorithm)
 
-    fun generateRefreshToken(expiresAt: Date, user: User): String = JWT.create()
-        .withClaim(
-            USER, mapOf(
-                ID to user._id,
-                ROLE to user.role.name,
-                IS_ACCOUNT_VERIFIED to user.isAccountVerified
-            )
-        )
-        .withExpiresAt(expiresAt)
-        .sign(algorithm)
-
     fun realm() = realm
     fun verifier(): JWTVerifier = verifier
     fun audience(): String = audience
 
     fun expiresAt(): Date = Date(System.currentTimeMillis() + TimeUnit.HOURS.toMillis(1))
 
-    fun decodeJWT(token: String): DecodedJWT = JWT.decode(token)
 }

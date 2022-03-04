@@ -1,0 +1,74 @@
+/*
+ * MIT License
+ *
+ * Copyright (c) 2021 2Play Technologies Ltd.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
+package com.twoplaylabs.repository
+
+import com.twoplaylabs.data.Token
+import org.litote.kmongo.*
+
+/*
+    Author: Damjan Miloshevski 
+    Created on 04/03/2022
+    Project: betting-doctor
+*/
+class TokensRepositoryImpl : TokensRepository, BaseRepository() {
+    override suspend fun insertToken(userEmail: String, token: String) {
+       val userToken = findTokensByEmail(userEmail)
+        if(userToken !=null){
+            userToken.tokens.add(token)
+            updateToken(userToken)
+        }else{
+            val tokens = mutableListOf<String>().apply { add(token) }
+            val newToken = Token(userEmail,tokens)
+            tokensCollection.insertOne(newToken)
+        }
+    }
+
+    override suspend fun updateToken(token: Token): Long {
+        val request = tokensCollection.updateOne(Token::userEmail eq token.userEmail,
+            set(Token::tokens setTo token.tokens))
+        return request.modifiedCount
+    }
+    
+    override suspend fun findTokensByEmail(email: String): Token? =
+        tokensCollection.findOne(Token::userEmail eq email)
+
+
+    override suspend fun findAllTokens(): List<Token> {
+       return tokensCollection.find().toList()
+    }
+
+    override suspend fun deleteToken(userEmail: String, token: String): Long {
+       val userToken = findTokensByEmail(userEmail)
+       userToken?.let { 
+           if(it.tokens.contains(token)){it.tokens.remove(token)}
+           return updateToken(userToken)
+       }?: return 0L
+    }
+
+    override suspend fun deleteAllTokens(): Long {
+        val request = tokensCollection.deleteMany("{}")
+        return request.deletedCount
+    }
+}

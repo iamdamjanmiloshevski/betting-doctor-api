@@ -29,10 +29,10 @@ import com.google.firebase.messaging.FirebaseMessaging
 import com.twoplaylabs.auth.JWTService
 import com.twoplaylabs.common.Message
 import com.twoplaylabs.data.*
+import com.twoplaylabs.repository.TokensRepository
 import com.twoplaylabs.repository.UsersRepository
 import com.twoplaylabs.util.AuthUtil.generateAccessToken
 import com.twoplaylabs.util.AuthUtil.generateWelcomeUrl
-import com.twoplaylabs.util.AuthUtil.isRefreshTokenValid
 import com.twoplaylabs.util.Constants
 import com.twoplaylabs.util.Constants.ACCOUNT_VERIFIED_MSG
 import com.twoplaylabs.util.Constants.AUTH_CONFIG_ADMIN
@@ -43,26 +43,23 @@ import com.twoplaylabs.util.Constants.FEEDBACK_ROUTE
 import com.twoplaylabs.util.Constants.FEEDBACK_SUCCESS_MESSAGE1
 import com.twoplaylabs.util.Constants.HELLO_TEMPLATE
 import com.twoplaylabs.util.Constants.ID_ROUTE
-import com.twoplaylabs.util.Constants.JWT_AUDIENCE
-import com.twoplaylabs.util.Constants.JWT_ID
-import com.twoplaylabs.util.Constants.MISSING_REFRESH_TOKEN
-import com.twoplaylabs.util.Constants.PARAM_REFRESH_TOKEN
 import com.twoplaylabs.util.Constants.PASSWORD_HASH_COST
 import com.twoplaylabs.util.Constants.PUSH_NOTIFICATIONS
 import com.twoplaylabs.util.Constants.REFRESH_TOKEN
 import com.twoplaylabs.util.Constants.REGISTER_HTML_MESSAGE
 import com.twoplaylabs.util.Constants.REGISTER_HTML_MESSAGE2
 import com.twoplaylabs.util.Constants.REGISTER_ROUTE
-import com.twoplaylabs.util.Constants.REGISTER_SUCCESS_MESSAGE1
+import com.twoplaylabs.util.Constants.REGISTER_SUCCESS_MESSAGE
 import com.twoplaylabs.util.Constants.SIGN_IN_VERIFICATION_MSG
+import com.twoplaylabs.util.Constants.TOKENS_ROUTE
+import com.twoplaylabs.util.Constants.TOKEN_DISABLED_SUCCESS
+import com.twoplaylabs.util.Constants.TOKEN_REJECT_ROUTE
 import com.twoplaylabs.util.Constants.TOPIC
-import com.twoplaylabs.util.Constants.UNABLE_TO_VERIFY_REFRESH_TOKEN
 import com.twoplaylabs.util.Constants.USERS_ROUTE
 import com.twoplaylabs.util.Constants.VERIFY_ACCOUNT_MSG
 import com.twoplaylabs.util.Constants.VERIFY_ROUTE
 import com.twoplaylabs.util.Constants.WELCOME
 import com.twoplaylabs.util.EmailManager.sendNoReplyEmail
-import com.twoplaylabs.util.JWTDecoder
 import io.ktor.application.*
 import io.ktor.auth.*
 import io.ktor.html.*
@@ -81,9 +78,8 @@ import kotlin.text.toCharArray
     Project: betting-doctor
 */
 
-private val tokens = mutableMapOf<String, MutableList<String>>()
 
-fun Route.usersController(repository: UsersRepository, jwtService: JWTService) {
+fun Route.usersController(repository: UsersRepository, tokensRepository: TokensRepository, jwtService: JWTService) {
     route(USERS_ROUTE) {
         authenticate(System.getenv(AUTH_CONFIG_ALL)) {
             getAllUsersController(repository)
@@ -94,14 +90,30 @@ fun Route.usersController(repository: UsersRepository, jwtService: JWTService) {
             sendNotificationController()
         }
         authenticate(System.getenv(AUTH_CONFIG_ADMIN)) {
-            rejectTokenController()
+            rejectTokenController(tokensRepository)
+            getAllTokensControllers(tokensRepository)
         }
-        signInController(repository, jwtService)
+        signInController(repository, tokensRepository, jwtService)
         registerController(repository)
-        refreshTokenController(repository, jwtService)
+        refreshTokenController(repository, tokensRepository, jwtService)
         verifyAccountController(repository)
         signOutController(repository)
         feedbackController(repository)
+    }
+}
+
+fun Route.getAllTokensControllers(tokensRepository: TokensRepository) {
+    get(TOKENS_ROUTE) {
+        try {
+            val tokens = tokensRepository.findAllTokens()
+            call.respond(tokens)
+        } catch (e: Throwable) {
+            application.log.error(e.message)
+            call.respond(
+                HttpStatusCode.BadRequest,
+                Message(Constants.SOMETHING_WENT_WRONG, HttpStatusCode.BadRequest.value)
+            )
+        }
     }
 }
 
@@ -333,7 +345,7 @@ private fun Route.registerController(repository: UsersRepository) {
                 call.respond(
                     HttpStatusCode.Created,
                     Message(
-                        String.format(REGISTER_SUCCESS_MESSAGE1, user.email),
+                        String.format(REGISTER_SUCCESS_MESSAGE, user.email),
                         HttpStatusCode.Created.value
                     )
                 )
@@ -348,25 +360,22 @@ private fun Route.registerController(repository: UsersRepository) {
     }
 }
 
-private fun Route.rejectTokenController() {
-    post("token/reject") {
+private fun Route.rejectTokenController(tokensRepository: TokensRepository) {
+    post(TOKEN_REJECT_ROUTE) {
         val refreshToken = call.receive<RefreshToken>()
         try {
             val userEmail = refreshToken.userEmail
             val token = refreshToken.token
-            if (tokens.containsKey(userEmail)) {
-                val userTokens = tokens[userEmail]
-                println(tokens)
-                userTokens?.let {
-                    if(userTokens.contains(token)){
-                        userTokens.remove(token)
-                    }
-                    println(tokens)
-                    call.respond(HttpStatusCode.OK)
-                }
-            }else {
-                call.respond(HttpStatusCode.Unauthorized)
-            }
+            val modifiedCount = tokensRepository.deleteToken(userEmail, token)
+            if (modifiedCount > 0) {
+                call.respond(
+                    HttpStatusCode.OK,
+                    Message(
+                        TOKEN_DISABLED_SUCCESS,
+                        HttpStatusCode.OK.value
+                    )
+                )
+            } else call.respond(HttpStatusCode.Unauthorized)
         } catch (e: Throwable) {
             application.log.error(e.message)
             call.respond(
@@ -377,60 +386,48 @@ private fun Route.rejectTokenController() {
     }
 }
 
-private fun Route.refreshTokenController(repository: UsersRepository, jwtService: JWTService) {
+private fun Route.refreshTokenController(
+    repository: UsersRepository,
+    tokensRepository: TokensRepository,
+    jwtService: JWTService
+) {
     post(REFRESH_TOKEN) {
         val refreshToken = call.receive<RefreshToken>()
         try {
             val userEmail = refreshToken.userEmail
             val token = refreshToken.token
-            if (tokens.containsKey(userEmail)) {
-                val userTokens = tokens[userEmail]
-                userTokens?.let {
-                    if (it.contains(token)) {
-                        val user = repository.findUserByEmail(userEmail)
-                        user?.let { bettingDoctorUser ->
-                            if (bettingDoctorUser.isAccountVerified) {
-                                val accessToken = generateAccessToken(bettingDoctorUser, jwtService)
-                                tokens[bettingDoctorUser.email]?.let { existingTokens ->
-                                    existingTokens.add(accessToken.refreshToken)
-                                    tokens[bettingDoctorUser.email] = existingTokens
-                                }
-                                println(tokens)
-                                call.respond(HttpStatusCode.OK, accessToken)
-                            } else call.respond(
-                                HttpStatusCode.Forbidden,
-                                Message(VERIFY_ACCOUNT_MSG, HttpStatusCode.Forbidden.value)
+            val user = repository.findUserByEmail(userEmail)
+            user?.let { bettingDoctorUser ->
+                if (bettingDoctorUser.isAccountVerified) {
+                    val userToken = tokensRepository.findTokensByEmail(userEmail)
+                    userToken?.let {
+                        if (it.tokens.contains(token)) {
+                            val accessToken = generateAccessToken(bettingDoctorUser, jwtService)
+                            it.tokens.add(accessToken.refreshToken)
+                            val updatedCount = tokensRepository.updateToken(it)
+                            println("Updated count $updatedCount")
+                            if (updatedCount > 0) call.respond(HttpStatusCode.OK, accessToken) else call.respond(
+                                HttpStatusCode.NotFound
                             )
-                        } ?: call.respond(
-                            HttpStatusCode.NotFound,
-                            Message(
-                                String.format(Constants.NO_USER_WITH_EMAIL, userEmail),
-                                HttpStatusCode.NotFound.value
-                            )
-                        )
-                    } else call.respond(HttpStatusCode.Unauthorized)
-                } ?: call.respond(HttpStatusCode.Unauthorized)
-            } else {
-                call.respond(HttpStatusCode.Unauthorized)
-            }
-
+                        } else call.respond(HttpStatusCode.Unauthorized)
+                    } ?: call.respond(HttpStatusCode.NoContent)
+                } else call.respond(
+                    HttpStatusCode.Forbidden,
+                    Message(VERIFY_ACCOUNT_MSG, HttpStatusCode.Forbidden.value)
+                )
+            } ?: call.respond(
+                HttpStatusCode.NotFound,
+                Message(
+                    String.format(Constants.NO_USER_WITH_EMAIL, userEmail),
+                    HttpStatusCode.NotFound.value
+                )
+            )
         } catch (e: Throwable) {
             application.log.error(e.message)
             call.respond(
                 HttpStatusCode.BadRequest,
                 Message(Constants.SOMETHING_WENT_WRONG, HttpStatusCode.BadRequest.value)
             )
-        }
-    }
-}
-
-private fun cleanupTokens(jwtService: JWTService, userRefreshTokens: MutableList<String>) {
-    for (token in userRefreshTokens) {
-        val decoded = jwtService.decodeJWT(token)
-        val jwtArgs = JWTDecoder.decodeJWT(decoded)
-        val tokenPayload = jwtArgs.second
-        if (!isRefreshTokenValid(tokenPayload.exp)) {
-            userRefreshTokens.remove(token)
         }
     }
 }
@@ -483,7 +480,11 @@ private fun Route.verifyAccountController(repository: UsersRepository) {
     }
 }
 
-private fun Route.signInController(repository: UsersRepository, jwtService: JWTService) {
+private fun Route.signInController(
+    repository: UsersRepository,
+    tokensRepository: TokensRepository,
+    jwtService: JWTService
+) {
     post(Constants.SIGN_IN_ROUTE) {
         val userInput = call.receive<UserInput>()
         try {
@@ -494,16 +495,7 @@ private fun Route.signInController(repository: UsersRepository, jwtService: JWTS
                     val result = BCrypt.verifyer().verify(userInput.password.toCharArray(), hashedPassword)
                     if (result.verified) {
                         val accessToken = generateAccessToken(bettingDoctorUser, jwtService)
-                        val userTokens = mutableListOf<String>()
-                        if (tokens[bettingDoctorUser.email].isNullOrEmpty()) {
-                            userTokens.add(accessToken.refreshToken)
-                            tokens[bettingDoctorUser.email] = userTokens
-                        } else {
-                            tokens[bettingDoctorUser.email]?.let {
-                                it.add(accessToken.refreshToken)
-                                tokens[bettingDoctorUser.email] = it
-                            }
-                        }
+                        tokensRepository.insertToken(bettingDoctorUser.email, accessToken.refreshToken)
                         call.respond(HttpStatusCode.OK, accessToken)
                     } else call.respond(
                         HttpStatusCode.Forbidden,

@@ -22,30 +22,11 @@
  * SOFTWARE.
  */
 
-package com.twoplaylabs.repository
-
-import com.twoplaylabs.data.*
-import com.twoplaylabs.util.Constants
-import com.twoplaylabs.util.Constants.BETTING_TIPS_COLLECTION
-import com.twoplaylabs.util.Constants.DB_CONNECTION_URL
-import com.twoplaylabs.util.Constants.FEEDBACKS_COLLECTION
-import com.twoplaylabs.util.Constants.TICKETS_COLLECTION
-import com.twoplaylabs.util.Constants.TOKENS_COLLECTION
-import com.twoplaylabs.util.Constants.USERS_COLLECTION
-import org.litote.kmongo.KMongo
-import org.litote.kmongo.getCollection
+package com.twoplaylabs.data
 
 /*
     Author: Damjan Miloshevski 
-    Created on 20/06/2021
+    Created on 04/03/2022
     Project: betting-doctor
 */
-abstract class BaseRepository {
-    private val client = KMongo.createClient(System.getenv(DB_CONNECTION_URL))
-    private val database = client.getDatabase(Constants.DB_NAME)
-    protected val bettingTipsCollection = database.getCollection<BettingTip>(BETTING_TIPS_COLLECTION)
-    protected val usersCollection = database.getCollection<User>(USERS_COLLECTION)
-    protected val feedbacksCollection = database.getCollection<FeedbackMessage>(FEEDBACKS_COLLECTION)
-    protected val ticketsCollection = database.getCollection<Ticket>(TICKETS_COLLECTION)
-    protected val tokensCollection = database.getCollection<Token>(TOKENS_COLLECTION)
-}
+data class Token( val userEmail:String,  val tokens:MutableList<String>)

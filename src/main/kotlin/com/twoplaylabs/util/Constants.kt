@@ -36,6 +36,7 @@ object Constants {
     const val USERS_COLLECTION = "users"
     const val TICKETS_COLLECTION = "tickets"
     const val FEEDBACKS_COLLECTION = "feedbacks"
+    const val TOKENS_COLLECTION = "tokens"
     const val WELCOME = "Welcome to Betting Doctor!"
     const val PASSWORD_HASH_COST = 16
     const val HELLO_TEMPLATE = "Hello %s"
@@ -64,6 +65,8 @@ object Constants {
     const val PUSH_NOTIFICATIONS = "/notifications/{topic}"
     const val TICKETS_ROUTE = "/api/v1/betting-tickets"
     const val SEARCH_ROUTE = "/search"
+    const val TOKENS_ROUTE = "/tokens"
+    const val TOKEN_REJECT_ROUTE = "/token/reject"
     //endregion
 
     //region https messages
@@ -82,10 +85,7 @@ object Constants {
     const val NO_BETTING_TIP_ID = "No betting tip with id %s"
     const val VERIFY_ACCOUNT_MSG = "Please verify your account!"
     const val REGISTER_SUCCESS_MESSAGE =
-        "Hi %s,\n\n You've successfully registered to Betting Doctor.\n\nPlease verify your account in the link below\n%s"
-    const val REGISTER_SUCCESS_MESSAGE1 =
         "You've successfully registered to Betting Doctor.\n Please check your email %s for further instructions."
-    const val ACCOUNT_VERIFY_SUCCESS_MESSAGE = "You've successfully verified your account, you can sign in now."
     const val REGISTER_HTML_MESSAGE =
         "<html><body><p>Hi %s,<br/>You've successfully registered to Betting Doctor<br/><br/>Please verify your account by clicking on the following <a href='%s'>link</a>"
     const val REGISTER_HTML_MESSAGE2 =
@@ -94,16 +94,13 @@ object Constants {
     const val FEEDBACK_HTML_MESSAGE =
         "<html><body><p>Dear %s,<br/><br/> Thank you for your feedback.<br/><br/>We will review it carefully and get back to you as soon as possible.<br/><br/>Kind regards, <br/></br/> 2Play Technologies team"
     const val INSUFFICIENT_PERMISSIONS = "Insufficient permissions"
-    const val MISSING_REFRESH_TOKEN = "Missing refresh token"
-    const val UNABLE_TO_VERIFY_REFRESH_TOKEN = "Unable to verify refresh token"
-    const val FEEDBACK_SUCCESS = "Your feedback has been submitted successfully"
+    const val TOKEN_DISABLED_SUCCESS = "Token disabled successfully"
     //endregion
 
     //region params
     const val PARAM_SPORT = "sport"
     const val PARAM_ID = "id"
     const val PARAM_DATE = "date"
-    const val PARAM_REFRESH_TOKEN = "refreshToken"
     //endregion
 
     //region Environment variables
@@ -117,7 +114,6 @@ object Constants {
     const val PORT = "PORT"
     const val JWT_SECRET = "JWT_SECRET"
     const val JWT_AUDIENCE = "JWT_AUDIENCE"
-    const val JWT_ID = "JWT_ID"
     const val DB_CONNECTION_URL = "DB_CONNECTION_URL"
     const val FIREBASE_STORAGE_BUCKET_URL = "FIREBASE_STORAGE_BUCKET_URL"
     const val FIREBASE_TYPE = "FIREBASE_TYPE"

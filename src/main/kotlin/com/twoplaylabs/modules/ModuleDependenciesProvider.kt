@@ -25,10 +25,7 @@
 package com.twoplaylabs.modules
 
 import com.twoplaylabs.auth.JWTService
-import com.twoplaylabs.repository.BettingTipsRepositoryImpl
-import com.twoplaylabs.repository.TicketsRepository
-import com.twoplaylabs.repository.TicketsRepositoryImpl
-import com.twoplaylabs.repository.UsersRepositoryImpl
+import com.twoplaylabs.repository.*
 
 /*
     Author: Damjan Miloshevski 
@@ -39,5 +36,6 @@ object ModuleDependenciesProvider {
      val bettingTipsRepository = BettingTipsRepositoryImpl()
      val ticketsRepository = TicketsRepositoryImpl()
      val usersRepository = UsersRepositoryImpl()
+     val tokensRepository = TokensRepositoryImpl()
      val jwtService = JWTService()
 }
