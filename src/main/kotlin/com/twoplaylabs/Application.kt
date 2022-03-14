@@ -51,37 +51,41 @@ fun main() {
     embeddedServer(Netty, port = httpPort) {
         install(CallLogging)
         install(DefaultHeaders)
-        routing {
-            get("/"){
-                val name = "Betting Doctor"
-                call.respondHtml(HttpStatusCode.OK){
-                    head {
-                        title { +name }
-                    }
-                    body {
-                        h1 {
-                            + "Doctor Betting API health check: Success"
-                        }
-                    }
+        healthCheck()
+        doctorBettingModule()
+        sportsAnalystModule()
+    }.start(wait = true)
+}
+
+private fun Application.healthCheck() {
+    routing {
+        get("/") {
+            val name = "Betting Doctor"
+            call.respondHtml(HttpStatusCode.OK) {
+                head {
+                    title { +name }
                 }
-            }
-            get("/health-check"){
-                val name = "Betting Doctor"
-                call.respondHtml(HttpStatusCode.OK){
-                    head {
-                        title { +name }
-                    }
-                    body {
-                        h1 {
-                            + "Health check: Success"
-                        }
+                body {
+                    h1 {
+                        +"Doctor Betting API health check: Success"
                     }
                 }
             }
         }
-        doctorBettingModule()
-        sportsAnalystModule()
-    }.start(wait = true)
+        get("/health-check") {
+            val name = "Betting Doctor"
+            call.respondHtml(HttpStatusCode.OK) {
+                head {
+                    title { +name }
+                }
+                body {
+                    h1 {
+                        +"Health check: Success"
+                    }
+                }
+            }
+        }
+    }
 }
 
 fun configureFirebase() {

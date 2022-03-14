@@ -30,7 +30,7 @@ import com.twoplaylabs.modules.ModuleDependenciesProvider.jwtService
 import com.twoplaylabs.modules.ModuleDependenciesProvider.tokensRepository
 import com.twoplaylabs.modules.ModuleDependenciesProvider.usersRepository
 import com.twoplaylabs.plugins.configureErrorHandling
-import com.twoplaylabs.plugins.configureDoctorBettingControllers
+import com.twoplaylabs.plugins.doctorBettingService
 import com.twoplaylabs.plugins.configureSecurity
 import com.twoplaylabs.plugins.configureSerialization
 
@@ -44,7 +44,7 @@ import io.ktor.application.*
 fun Application.doctorBettingModule(){
     configureFirebase()
     configureSecurity(jwtService, usersRepository)
-    configureDoctorBettingControllers(bettingTipsRepository, usersRepository, tokensRepository, jwtService)
+    doctorBettingService(bettingTipsRepository, usersRepository, tokensRepository, jwtService)
     configureErrorHandling()
     configureSerialization()
 }

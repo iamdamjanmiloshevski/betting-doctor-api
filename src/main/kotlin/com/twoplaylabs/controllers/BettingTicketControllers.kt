@@ -52,7 +52,7 @@ import java.util.*
     Created on 25/12/2021
     Project: betting-doctor
 */
-fun Route.bettingTicketController(repository: TicketsRepository) {
+fun Route.bettingTicketRouter(repository: TicketsRepository) {
     route(TICKETS_ROUTE) {
         with(repository) {
             authenticate(System.getenv(Constants.AUTH_CONFIG_ADMIN)) {
@@ -88,11 +88,8 @@ fun Route.createTicket(repository: TicketsRepository) {
                 }
                 ticket.tips = updatedTips
                 for (tip in ticket.tips) {
-                    tip._id = ObjectId().toString()
                     tip.ticketId = ticketId.toString()
                 }
-                ticket._id = ticketId.toString()
-                ticket.date = Date()
                 repository.insertTicket(ticket)
                 call.respond(HttpStatusCode.Created, ticket)
             } catch (e: Throwable) {
@@ -180,7 +177,7 @@ fun Route.updateTicket(repository: TicketsRepository) {
             try {
                 val updatedTips = mutableListOf<BettingTip>()
                 for (tip in ticket.tips) {
-                    if(tip._id == null) tip._id = ObjectId().toString()
+                    //if(tip._id == null) tip._id = ObjectId().toString()
                     fetchTeamLogosAndUpdateBettingTip(tip, callback = {
                         updatedTips.add(it)
                     })

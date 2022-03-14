@@ -22,31 +22,18 @@
  * SOFTWARE.
  */
 
-package com.twoplaylabs.repository
+package com.twoplaylabs.data
 
-import com.twoplaylabs.data.FeedbackMessage
-import com.twoplaylabs.data.User
+import com.google.gson.annotations.SerializedName
 
 /*
     Author: Damjan Miloshevski 
-    Created on 15/09/2021
+    Created on 11/03/2022
     Project: betting-doctor
 */
-interface UsersRepository {
-    suspend fun insertUser(user: User)
-    suspend fun insertFeedback(feedbackMessage: FeedbackMessage)
-
-    suspend fun updateUser(user: User): Long
-    suspend fun updateUserPassword(id: String, hashedPassword: String): Long
-
-    suspend fun verifyUserAccount(id:String):Long
-
-    suspend fun findUserByEmail(email: String): User?
-    suspend fun findUserById(id: String): User?
-    suspend fun findAllUsers(): List<User>
-
-    suspend fun deleteUserById(id: String): Long
-    suspend fun deleteAllUsers(): Long
-
-
+enum class NotificationTopic(val value:String) {
+    @SerializedName("new-tips")
+    Tips ("new-tips"),
+    @SerializedName("Ticket")
+    Ticket("Ticket")
 }

@@ -51,7 +51,7 @@ import java.util.*
     Project: betting-doctor
 */
 
-fun Route.bettingTipsController(repository: BettingTipsRepository) {
+fun Route.bettingTipsRouter(repository: BettingTipsRepository) {
     route(BETTING_TIPS_ROUTE) {
         authenticate(System.getenv(AUTH_CONFIG_ADMIN)) {
             createBettingTip(repository)

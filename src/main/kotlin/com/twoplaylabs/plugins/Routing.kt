@@ -25,36 +25,36 @@
 package com.twoplaylabs.plugins
 
 import com.twoplaylabs.auth.JWTService
-import com.twoplaylabs.controllers.bettingTicketController
+import com.twoplaylabs.controllers.bettingTicketRouter
 import com.twoplaylabs.repository.BettingTipsRepository
 import com.twoplaylabs.repository.UsersRepository
-import com.twoplaylabs.controllers.bettingTipsController
-import com.twoplaylabs.controllers.usersController
+import com.twoplaylabs.controllers.bettingTipsRouter
+import com.twoplaylabs.controllers.usersRouter
 import com.twoplaylabs.repository.TicketsRepository
 import com.twoplaylabs.repository.TokensRepository
 import io.ktor.routing.*
 import io.ktor.application.*
 
-fun Application.configureDoctorBettingControllers(
+fun Application.doctorBettingService(
     bettingTipsRepository: BettingTipsRepository,
     usersRepository: UsersRepository,
     tokensRepository: TokensRepository,
     jwtService: JWTService
 ) {
     routing {
-        bettingTipsController(bettingTipsRepository)
-        usersController(usersRepository, tokensRepository,jwtService)
+        bettingTipsRouter(bettingTipsRepository)
+        usersRouter(usersRepository, tokensRepository,jwtService)
 
     }
 }
 
-fun Application.configureSportsAnalystControllers(
+fun Application.sportsAnalystService(
     ticketsRepository: TicketsRepository,
     usersRepository: UsersRepository,
     jwtService: JWTService
 ){
     routing {
-        bettingTicketController(ticketsRepository)
+        bettingTicketRouter(ticketsRepository)
     }
 }
 

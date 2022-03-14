@@ -25,7 +25,9 @@
 package com.twoplaylabs.data
 
 import io.ktor.auth.*
+import kotlinx.serialization.Contextual
 import kotlinx.serialization.SerialName
+import java.util.*
 
 /*
     Author: Damjan Miloshevski 
@@ -35,11 +37,13 @@ import kotlinx.serialization.SerialName
 data class User(
     @SerialName("_id")
     val _id: String,
-    var name: String,
-    var surname: String="",
-    var avatarUrl: String?="",
-    var email: String="",
-    var hashedPassword: String="",
-    var isAccountVerified:Boolean = false,
-    var role:UserRole = UserRole.CUSTOMER
+    val name: String,
+    val surname: String="",
+    val avatarUrl: String?="",
+    val email: String="",
+    val hashedPassword: String="",
+    val isAccountVerified:Boolean = false,
+    @Contextual
+    val lastSignedIn:Date = Date(),
+    val role:UserRole = UserRole.CUSTOMER
 ):Principal

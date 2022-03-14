@@ -38,11 +38,19 @@ import com.twoplaylabs.util.Constants.ACCOUNT_VERIFIED_MSG
 import com.twoplaylabs.util.Constants.AUTH_CONFIG_ADMIN
 import com.twoplaylabs.util.Constants.AUTH_CONFIG_ALL
 import com.twoplaylabs.util.Constants.CHANGE_PWD_ROUTE
+import com.twoplaylabs.util.Constants.CHANNEL
+import com.twoplaylabs.util.Constants.CHANNEL_ID
 import com.twoplaylabs.util.Constants.FEEDBACK_HTML_MESSAGE
 import com.twoplaylabs.util.Constants.FEEDBACK_ROUTE
 import com.twoplaylabs.util.Constants.FEEDBACK_SUCCESS_MESSAGE1
 import com.twoplaylabs.util.Constants.HELLO_TEMPLATE
 import com.twoplaylabs.util.Constants.ID_ROUTE
+import com.twoplaylabs.util.Constants.MESSAGE
+import com.twoplaylabs.util.Constants.NOTIFICATION_CHANNEL_TICKET
+import com.twoplaylabs.util.Constants.NOTIFICATION_CHANNEL_TIPS
+import com.twoplaylabs.util.Constants.NOTIFICATION_TICKET_MSG
+import com.twoplaylabs.util.Constants.NOTIFICATION_TIPS_MSG
+import com.twoplaylabs.util.Constants.PARAM_EMAIL
 import com.twoplaylabs.util.Constants.PASSWORD_HASH_COST
 import com.twoplaylabs.util.Constants.PUSH_NOTIFICATIONS
 import com.twoplaylabs.util.Constants.REFRESH_TOKEN
@@ -50,6 +58,7 @@ import com.twoplaylabs.util.Constants.REGISTER_HTML_MESSAGE
 import com.twoplaylabs.util.Constants.REGISTER_HTML_MESSAGE2
 import com.twoplaylabs.util.Constants.REGISTER_ROUTE
 import com.twoplaylabs.util.Constants.REGISTER_SUCCESS_MESSAGE
+import com.twoplaylabs.util.Constants.SEARCH_ROUTE
 import com.twoplaylabs.util.Constants.SIGN_IN_VERIFICATION_MSG
 import com.twoplaylabs.util.Constants.TOKENS_ROUTE
 import com.twoplaylabs.util.Constants.TOKEN_DISABLED_SUCCESS
@@ -69,6 +78,7 @@ import io.ktor.response.*
 import io.ktor.routing.*
 import kotlinx.html.*
 import org.bson.types.ObjectId
+import java.lang.Exception
 import java.util.*
 import kotlin.text.toCharArray
 
@@ -79,30 +89,54 @@ import kotlin.text.toCharArray
 */
 
 
-fun Route.usersController(repository: UsersRepository, tokensRepository: TokensRepository, jwtService: JWTService) {
+fun Route.usersRouter(repository: UsersRepository, tokensRepository: TokensRepository, jwtService: JWTService) {
     route(USERS_ROUTE) {
         authenticate(System.getenv(AUTH_CONFIG_ALL)) {
-            getAllUsersController(repository)
-            getUserByIdController(repository)
-            updateUserController(repository)
-            changePasswordController(repository)
-            deleteUserController(repository)
-            sendNotificationController()
+            getAllUsers(repository)
+            getUserById(repository)
+            getUserByEmail(repository)
+            updateUser(repository)
+            changePassword(repository)
+            deleteUser(repository)
+            sendNotification()
         }
         authenticate(System.getenv(AUTH_CONFIG_ADMIN)) {
-            rejectTokenController(tokensRepository)
-            getAllTokensControllers(tokensRepository)
+            rejectToken(tokensRepository)
+            getAllTokens(tokensRepository)
         }
-        signInController(repository, tokensRepository, jwtService)
-        registerController(repository)
-        refreshTokenController(repository, tokensRepository, jwtService)
-        verifyAccountController(repository)
-        signOutController(repository)
-        feedbackController(repository)
+        signIn(repository, tokensRepository, jwtService)
+        register(repository)
+        refreshToken(repository, tokensRepository, jwtService)
+        verifyAccount(repository)
+        signOut(repository)
+        feedback(repository)
     }
 }
 
-fun Route.getAllTokensControllers(tokensRepository: TokensRepository) {
+fun Route.getUserByEmail(repository: UsersRepository) {
+    get(SEARCH_ROUTE) {
+        val email = call.parameters[PARAM_EMAIL] ?: return@get call.respond(
+            HttpStatusCode.BadRequest, Message(Constants.MISSING_EMAIL, HttpStatusCode.BadRequest.value)
+        )
+        try {
+            val user = repository.findUserByEmail(email)
+            user?.let {
+                call.respond(HttpStatusCode.OK, user)
+            } ?: call.respond(
+                HttpStatusCode.NotFound,
+                Message("User with email $email not found", HttpStatusCode.NotFound.value)
+            )
+        } catch (e: Exception) {
+            application.log.error(e.message)
+            call.respond(
+                HttpStatusCode.BadRequest,
+                Message(Constants.SOMETHING_WENT_WRONG, HttpStatusCode.BadRequest.value)
+            )
+        }
+    }
+}
+
+fun Route.getAllTokens(tokensRepository: TokensRepository) {
     get(TOKENS_ROUTE) {
         try {
             val tokens = tokensRepository.findAllTokens()
@@ -117,24 +151,42 @@ fun Route.getAllTokensControllers(tokensRepository: TokensRepository) {
     }
 }
 
-fun Route.sendNotificationController() {
+fun Route.sendNotification() {
     this.post(PUSH_NOTIFICATIONS) {
-        val topic = call.parameters[TOPIC] ?: return@post call.respond(
-            HttpStatusCode.BadRequest,
-            Message("Please provide notifications topic", HttpStatusCode.BadRequest.value)
-        )
+        val notification = call.receive<Notification>()
         try {
-            val notificationMessage = when (topic) {
-                "new-tips" -> "New betting tips available!"
-                else -> "Check out what's new in Betting Doctor!"
+            var notificationMessage: String? = ""
+            var channelId: String? = ""
+            var channel: String? = ""
+            when (notification.topic) {
+                NotificationTopic.Tips -> {
+                    notificationMessage = NOTIFICATION_TIPS_MSG
+                    channelId = NOTIFICATION_CHANNEL_TIPS
+                    channel = NOTIFICATION_CHANNEL_TIPS
+                }
+                NotificationTopic.Ticket -> {
+                    notificationMessage = NOTIFICATION_TICKET_MSG
+                    channelId =NOTIFICATION_CHANNEL_TICKET
+                    channel = NOTIFICATION_CHANNEL_TICKET
+                }
             }
+            val topic = notification.topic.value
             val message = com.google.firebase.messaging.Message.builder()
-                .putData("message", notificationMessage)
+                .putAllData(
+                    mapOf(
+                        TOPIC to topic,
+                        MESSAGE to notificationMessage,
+                        CHANNEL to channel,
+                        CHANNEL_ID to channelId
+                    )
+                )
                 .setTopic(topic)
                 .build()
-            val response = FirebaseMessaging.getInstance().send(message)
-            call.respond(HttpStatusCode.OK)
-            println("Successfully send message $response")
+            FirebaseMessaging.getInstance().send(message)
+            call.respond(
+                HttpStatusCode.OK, Notification(notification.topic, notificationMessage, channel, channelId)
+            )
+            println("Successfully sent message to topic $topic")
         } catch (e: Throwable) {
             application.log.error(e.message)
             call.respond(
@@ -146,8 +198,8 @@ fun Route.sendNotificationController() {
 }
 
 
-private fun Route.deleteUserController(repository: UsersRepository) {
-    this@deleteUserController.delete(ID_ROUTE) {
+private fun Route.deleteUser(repository: UsersRepository) {
+    this@deleteUser.delete(ID_ROUTE) {
         val parameters = call.parameters
         val id = parameters[Constants.PARAM_ID] ?: return@delete call.respond(
             HttpStatusCode.BadRequest,
@@ -171,7 +223,7 @@ private fun Route.deleteUserController(repository: UsersRepository) {
     }
 }
 
-private fun Route.changePasswordController(repository: UsersRepository) {
+private fun Route.changePassword(repository: UsersRepository) {
     put(CHANGE_PWD_ROUTE) {
         val id = call.parameters[Constants.PARAM_ID] ?: return@put call.respond(
             HttpStatusCode.BadRequest,
@@ -218,7 +270,7 @@ private fun Route.changePasswordController(repository: UsersRepository) {
     }
 }
 
-private fun Route.updateUserController(repository: UsersRepository) {
+private fun Route.updateUser(repository: UsersRepository) {
     put(ID_ROUTE) {
         val parameters = call.parameters
         val userToUpdate = call.receive<User>()
@@ -256,7 +308,7 @@ private fun Route.updateUserController(repository: UsersRepository) {
     }
 }
 
-private fun Route.getUserByIdController(repository: UsersRepository) {
+private fun Route.getUserById(repository: UsersRepository) {
     get(ID_ROUTE) {
         val id = call.parameters[Constants.PARAM_ID] ?: return@get call.respond(
             HttpStatusCode.BadRequest,
@@ -280,7 +332,7 @@ private fun Route.getUserByIdController(repository: UsersRepository) {
     }
 }
 
-private fun Route.getAllUsersController(repository: UsersRepository) {
+private fun Route.getAllUsers(repository: UsersRepository) {
     get {
         try {
             val users = repository.findAllUsers()
@@ -295,7 +347,7 @@ private fun Route.getAllUsersController(repository: UsersRepository) {
     }
 }
 
-private fun Route.signOutController(repository: UsersRepository) {
+private fun Route.signOut(repository: UsersRepository) {
     post(Constants.SIGN_OUT_ROUTE) {
         val userInput = call.receive<UserInput>()
         try {
@@ -313,7 +365,7 @@ private fun Route.signOutController(repository: UsersRepository) {
     }
 }
 
-private fun Route.registerController(repository: UsersRepository) {
+private fun Route.register(repository: UsersRepository) {
     post(REGISTER_ROUTE) {
         val userInput = call.receive<UserInput>()
         try {
@@ -360,7 +412,7 @@ private fun Route.registerController(repository: UsersRepository) {
     }
 }
 
-private fun Route.rejectTokenController(tokensRepository: TokensRepository) {
+private fun Route.rejectToken(tokensRepository: TokensRepository) {
     post(TOKEN_REJECT_ROUTE) {
         val refreshToken = call.receive<RefreshToken>()
         try {
@@ -386,7 +438,7 @@ private fun Route.rejectTokenController(tokensRepository: TokensRepository) {
     }
 }
 
-private fun Route.refreshTokenController(
+private fun Route.refreshToken(
     repository: UsersRepository,
     tokensRepository: TokensRepository,
     jwtService: JWTService
@@ -432,7 +484,7 @@ private fun Route.refreshTokenController(
     }
 }
 
-private fun Route.verifyAccountController(repository: UsersRepository) {
+private fun Route.verifyAccount(repository: UsersRepository) {
     get(VERIFY_ROUTE) {
         val id = call.parameters[Constants.PARAM_ID] ?: return@get call.respond(
             HttpStatusCode.BadRequest,
@@ -480,7 +532,7 @@ private fun Route.verifyAccountController(repository: UsersRepository) {
     }
 }
 
-private fun Route.signInController(
+private fun Route.signIn(
     repository: UsersRepository,
     tokensRepository: TokensRepository,
     jwtService: JWTService
@@ -519,7 +571,7 @@ private fun Route.signInController(
     }
 }
 
-private fun Route.feedbackController(repository: UsersRepository) {
+private fun Route.feedback(repository: UsersRepository) {
     post(FEEDBACK_ROUTE) {
         val feedbackMessage = call.receive<FeedbackMessage>()
         try {

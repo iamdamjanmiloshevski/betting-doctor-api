@@ -24,12 +24,10 @@
 
 package com.twoplaylabs.modules.sportsanalyst
 
-import com.twoplaylabs.modules.ModuleDependenciesProvider.bettingTipsRepository
 import com.twoplaylabs.modules.ModuleDependenciesProvider.jwtService
 import com.twoplaylabs.modules.ModuleDependenciesProvider.ticketsRepository
 import com.twoplaylabs.modules.ModuleDependenciesProvider.usersRepository
-import com.twoplaylabs.plugins.configureDoctorBettingControllers
-import com.twoplaylabs.plugins.configureSportsAnalystControllers
+import com.twoplaylabs.plugins.sportsAnalystService
 import io.ktor.application.*
 
 /*
@@ -38,7 +36,7 @@ import io.ktor.application.*
     Project: betting-doctor
 */
 fun Application.sportsAnalystModule(){
-    configureSportsAnalystControllers(
+    sportsAnalystService(
         ticketsRepository,
         usersRepository,
         jwtService

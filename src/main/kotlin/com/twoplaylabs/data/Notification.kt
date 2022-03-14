@@ -22,31 +22,11 @@
  * SOFTWARE.
  */
 
-package com.twoplaylabs.repository
-
-import com.twoplaylabs.data.FeedbackMessage
-import com.twoplaylabs.data.User
+package com.twoplaylabs.data
 
 /*
     Author: Damjan Miloshevski 
-    Created on 15/09/2021
+    Created on 11/03/2022
     Project: betting-doctor
 */
-interface UsersRepository {
-    suspend fun insertUser(user: User)
-    suspend fun insertFeedback(feedbackMessage: FeedbackMessage)
-
-    suspend fun updateUser(user: User): Long
-    suspend fun updateUserPassword(id: String, hashedPassword: String): Long
-
-    suspend fun verifyUserAccount(id:String):Long
-
-    suspend fun findUserByEmail(email: String): User?
-    suspend fun findUserById(id: String): User?
-    suspend fun findAllUsers(): List<User>
-
-    suspend fun deleteUserById(id: String): Long
-    suspend fun deleteAllUsers(): Long
-
-
-}
+data class Notification(val topic:NotificationTopic,val message:String,val channel:String,val channelId:String)

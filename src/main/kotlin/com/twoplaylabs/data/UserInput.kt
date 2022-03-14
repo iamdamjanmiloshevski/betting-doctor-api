@@ -24,6 +24,9 @@
 
 package com.twoplaylabs.data
 
+import kotlinx.serialization.Contextual
+import java.util.*
+
 /*
     Author: Damjan Miloshevski 
     Created on 20/06/2021
@@ -36,5 +39,6 @@ data class UserInput(
     var surname: String = "",
     var avatarUrl: String? = null,
     var newPassword:String? = null,
+    val lastSignedIn:Date? = null,
     var role: UserRole = UserRole.CUSTOMER
 )

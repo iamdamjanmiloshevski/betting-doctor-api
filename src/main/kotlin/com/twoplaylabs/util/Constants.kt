@@ -42,13 +42,17 @@ object Constants {
     const val HELLO_TEMPLATE = "Hello %s"
     const val ACCOUNT_VERIFIED_MSG = "You've successfully verified your account."
     const val SIGN_IN_VERIFICATION_MSG = "You can sign in now"
+    const val NOTIFICATION_TIPS_MSG = "New betting tips available!"
+    const val NOTIFICATION_TICKET_MSG =  "New ticket available!"
+    const val NOTIFICATION_CHANNEL_TIPS = "new-tips"
+    const val NOTIFICATION_CHANNEL_TICKET  = "Ticket"
     const val AUTHENTICATION = "Authentication"
     const val ID = "_id"
     const val ROLE = "role"
-    const val USER = "user"
-    const val IS_ACCOUNT_VERIFIED = "isAccountVerified"
     const val TOPIC = "topic"
-
+    const val MESSAGE =  "message"
+    const val CHANNEL = "channel"
+    const val CHANNEL_ID = "channelId"
     //region routes
     const val BETTING_TIPS_ROUTE = "${API_PREFIX}/betting-tips"
     const val USERS_ROUTE = "${API_PREFIX}/users"
@@ -62,7 +66,7 @@ object Constants {
     const val SIGN_OUT_ROUTE = "/signout"
     const val FEEDBACK_ROUTE = "/feedback"
     const val REFRESH_TOKEN = "/token"
-    const val PUSH_NOTIFICATIONS = "/notifications/{topic}"
+    const val PUSH_NOTIFICATIONS = "/notifications"
     const val TICKETS_ROUTE = "/api/v1/betting-tickets"
     const val SEARCH_ROUTE = "/search"
     const val TOKENS_ROUTE = "/tokens"
@@ -73,6 +77,7 @@ object Constants {
     const val SOMETHING_WENT_WRONG = "Something went wrong!"
     const val MISSING_SPORT = "Missing or malformed sport"
     const val MISSING_ID = "Missing or malformed id"
+    const val MISSING_EMAIL = "Missing or malformed email"
     const val NO_USER_FOUND = "No user found!"
     const val USER_UPDATED_SUCCESSFULLY = "User %s has been updated successfully!"
     const val NO_USER_WITH_EMAIL = "No user with email %s found"
@@ -101,6 +106,7 @@ object Constants {
     const val PARAM_SPORT = "sport"
     const val PARAM_ID = "id"
     const val PARAM_DATE = "date"
+    const val PARAM_EMAIL = "email"
     //endregion
 
     //region Environment variables
