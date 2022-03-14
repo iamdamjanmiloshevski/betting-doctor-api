@@ -28,16 +28,13 @@ import com.auth0.jwt.JWT
 import com.auth0.jwt.JWTVerifier
 import com.auth0.jwt.algorithms.Algorithm
 import com.twoplaylabs.data.User
-import java.util.*
-import java.util.concurrent.TimeUnit
-import com.auth0.jwt.interfaces.DecodedJWT
 import com.twoplaylabs.util.Constants.AUTHENTICATION
 import com.twoplaylabs.util.Constants.ID
-import com.twoplaylabs.util.Constants.IS_ACCOUNT_VERIFIED
 import com.twoplaylabs.util.Constants.JWT_AUDIENCE
 import com.twoplaylabs.util.Constants.JWT_SECRET
 import com.twoplaylabs.util.Constants.ROLE
-import com.twoplaylabs.util.Constants.USER
+import java.util.*
+import java.util.concurrent.TimeUnit
 
 /*
     Author: Damjan Miloshevski 
