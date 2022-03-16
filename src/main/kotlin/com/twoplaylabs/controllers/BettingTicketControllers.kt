@@ -76,20 +76,18 @@ fun Route.createTicket(repository: TicketsRepository) {
                 HttpStatusCode.Unauthorized,
                 Message(Constants.INSUFFICIENT_PERMISSIONS, HttpStatusCode.Unauthorized.value)
             )
-        }else{
+        } else {
             val ticket = call.receive<Ticket>()
             try {
                 val ticketId = ObjectId()
                 val updatedTips = mutableListOf<BettingTip>()
                 for (tip in ticket.tips) {
-                    fetchTeamLogosAndUpdateBettingTip(tip, callback = {
+                    val alteredTip = tip.copy(_id = ObjectId().toString(), ticketId = ticketId.toString())
+                    fetchTeamLogosAndUpdateBettingTip(alteredTip, callback = {
                         updatedTips.add(it)
                     })
                 }
                 ticket.tips = updatedTips
-                for (tip in ticket.tips) {
-                    tip.ticketId = ticketId.toString()
-                }
                 repository.insertTicket(ticket)
                 call.respond(HttpStatusCode.Created, ticket)
             } catch (e: Throwable) {
@@ -172,7 +170,7 @@ fun Route.updateTicket(repository: TicketsRepository) {
                 HttpStatusCode.Unauthorized,
                 Message(Constants.INSUFFICIENT_PERMISSIONS, HttpStatusCode.Unauthorized.value)
             )
-        }else{
+        } else {
             val ticket = call.receive<Ticket>()
             try {
                 val updatedTips = mutableListOf<BettingTip>()

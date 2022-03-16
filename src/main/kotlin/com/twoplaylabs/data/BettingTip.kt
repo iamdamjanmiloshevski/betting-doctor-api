@@ -26,6 +26,7 @@ package com.twoplaylabs.data
 
 import kotlinx.serialization.Contextual
 import kotlinx.serialization.SerialName
+import org.bson.types.ObjectId
 import java.util.*
 
 
@@ -35,17 +36,17 @@ import java.util.*
     Project: betting-doctor
 */
 data class BettingTip(
-    var leagueName: String,
-    var teamHome: Team,
-    var teamAway: Team,
+    val leagueName: String,
+    val teamHome: Team,
+    val teamAway: Team,
     @Contextual
-    var gameTime: Date,
-    var bettingType: String,
-    var status: Status,
-    var result: String,
+    val gameTime: Date,
+    val bettingType: String,
+    val status: Status,
+    val result: String,
     @SerialName("_id")
-    var _id: String?,
-    var sport: String,
+    val _id: String? = ObjectId().toString(),
+    val sport: String,
     val coefficient:String? =null,
-    var ticketId:String? = null
+    val ticketId:String? = null
 )
