@@ -53,6 +53,7 @@ Hosted by Heroku
    - @PUT^ **{{api_url}}/betting-tickets** Update betting tip (requires JSON object in the BODY)
    - @DELETE^ **{{api_url}}/betting-tickets/{id}** Delete betting tip by id
    - @DELETE^ **{{api_url}}/betting-tickets** Delete all betting tips
+   - 
 
 3. Users
     - @POST **{{api_url}}/users/signin** Sign in user (requires JSON object in the BODY)
