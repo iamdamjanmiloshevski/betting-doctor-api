@@ -35,5 +35,5 @@ import java.util.*
 */
 data class FeedbackMessage(
     @SerialName("_id")
-    var _id: String, val name: String, val email: String, val message: String, var createdAt: Date
+    val _id: String, val name: String, val email: String, val message: String, val createdAt: Date
 )

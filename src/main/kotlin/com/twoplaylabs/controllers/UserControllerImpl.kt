@@ -22,33 +22,35 @@
  * SOFTWARE.
  */
 
-package com.twoplaylabs.repository
+package com.twoplaylabs.controllers
 
-import com.mongodb.client.MongoClient
-import com.twoplaylabs.data.*
-import com.twoplaylabs.util.Constants
-import com.twoplaylabs.util.Constants.BETTING_TIPS_COLLECTION
-import com.twoplaylabs.util.Constants.DB_CONNECTION_URL
-import com.twoplaylabs.util.Constants.FEEDBACKS_COLLECTION
-import com.twoplaylabs.util.Constants.TICKETS_COLLECTION
-import com.twoplaylabs.util.Constants.TOKENS_COLLECTION
-import com.twoplaylabs.util.Constants.USERS_COLLECTION
-import org.koin.java.KoinJavaComponent
+import com.twoplaylabs.data.FeedbackMessage
+import com.twoplaylabs.data.User
+import com.twoplaylabs.repository.UsersRepository
 import org.koin.java.KoinJavaComponent.inject
-import org.litote.kmongo.KMongo
-import org.litote.kmongo.getCollection
 
 /*
     Author: Damjan Miloshevski 
-    Created on 20/06/2021
+    Created on 05/04/2022
     Project: betting-doctor
 */
-abstract class BaseRepository {
-    private val client: MongoClient by inject(MongoClient::class.java)
-    private val database = client.getDatabase(Constants.DB_NAME)
-    protected val bettingTipsCollection = database.getCollection<BettingTip>(BETTING_TIPS_COLLECTION)
-    protected val usersCollection = database.getCollection<User>(USERS_COLLECTION)
-    protected val feedbacksCollection = database.getCollection<FeedbackMessage>(FEEDBACKS_COLLECTION)
-    protected val ticketsCollection = database.getCollection<Ticket>(TICKETS_COLLECTION)
-    protected val tokensCollection = database.getCollection<Token>(TOKENS_COLLECTION)
+class UserControllerImpl(private val repository: UsersRepository):UserController {
+    override suspend fun insertUser(user: User) = repository.insertUser(user)
+
+    override suspend fun insertFeedback(feedbackMessage: FeedbackMessage) = repository.insertFeedback(feedbackMessage)
+
+    override suspend fun updateUser(user: User): Long = repository.updateUser(user)
+    override suspend fun updateUserPassword(id: String, hashedPassword: String): Long = repository.updateUserPassword(id,hashedPassword)
+
+    override suspend fun verifyUserAccount(id: String): Long = repository.verifyUserAccount(id)
+
+    override suspend fun findUserByEmail(email: String): User?  = repository.findUserByEmail(email)
+
+    override suspend fun findUserById(id: String): User? = repository.findUserById(id)
+
+    override suspend fun findAllUsers(): List<User>  = repository.findAllUsers()
+
+    override suspend fun deleteUserById(id: String): Long = repository.deleteUserById(id)
+
+    override suspend fun deleteAllUsers(): Long  = repository.deleteAllUsers()
 }

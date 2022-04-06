@@ -26,6 +26,7 @@ package com.twoplaylabs.auth
 
 
 import com.google.gson.annotations.SerializedName
+import com.twoplaylabs.data.auth.JWTUser
 
 data class JWTPayload(
     @SerializedName("aud")

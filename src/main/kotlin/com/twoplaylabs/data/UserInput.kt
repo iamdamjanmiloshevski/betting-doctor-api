@@ -35,10 +35,10 @@ import java.util.*
 data class UserInput(
     val email: String,
     val password: String,
-    var name: String = "",
-    var surname: String = "",
-    var avatarUrl: String? = null,
-    var newPassword:String? = null,
+    val name: String = "",
+    val surname: String = "",
+    val avatarUrl: String? = null,
+    val newPassword:String? = null,
     val lastSignedIn:Date? = null,
-    var role: UserRole = UserRole.CUSTOMER
+    val role: UserRole = UserRole.CUSTOMER
 )

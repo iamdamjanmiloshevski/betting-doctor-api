@@ -22,20 +22,20 @@
  * SOFTWARE.
  */
 
-package com.twoplaylabs.data
+package com.twoplaylabs.controllers
 
-import kotlinx.serialization.SerialName
-import org.bson.types.ObjectId
-import java.util.*
+import com.twoplaylabs.data.Token
 
 /*
     Author: Damjan Miloshevski 
-    Created on 25/12/2021
+    Created on 06/04/2022
     Project: betting-doctor
 */
-data class Ticket(
-    @SerialName("_id")
-    val _id: String = ObjectId().toString(),
-    val date:Date = Date(),
-    val tips: List<BettingTip>
-)
+interface TokenController {
+    suspend fun insertToken(userEmail:String,token: String)
+    suspend fun updateToken(token: Token): Long
+    suspend fun findTokensByEmail(email: String): Token?
+    suspend fun findAllTokens(): List<Token>
+    suspend fun deleteToken(userEmail: String, token: String): Long
+    suspend fun deleteAllTokens(): Long
+}

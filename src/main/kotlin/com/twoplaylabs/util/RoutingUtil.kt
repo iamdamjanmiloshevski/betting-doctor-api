@@ -22,20 +22,17 @@
  * SOFTWARE.
  */
 
-package com.twoplaylabs.modules
-
-import com.twoplaylabs.auth.JWTService
-import com.twoplaylabs.repository.*
+package com.twoplaylabs.util
 
 /*
     Author: Damjan Miloshevski 
-    Created on 13/12/2021
+    Created on 05/04/2022
     Project: betting-doctor
 */
-object ModuleDependenciesProvider {
-     val bettingTipsRepository = BettingTipsRepositoryImpl()
-     val ticketsRepository = TicketsRepositoryImpl()
-     val usersRepository = UsersRepositoryImpl()
-     val tokensRepository = TokensRepositoryImpl()
-     val jwtService = JWTService()
+fun String.convertIfSoccer(): String {
+    return when (this) {
+        "Soccer" -> "Football"
+        "soccer" -> "football"
+        else -> this
+    }
 }

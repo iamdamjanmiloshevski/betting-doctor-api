@@ -26,8 +26,8 @@ package com.twoplaylabs.data
 
 
 /*
-    Author: Damjan Miloshevski 
+    Author: Damjan Miloshevski
     Created on 18/06/2021
     Project: betting-doctor
 */
-data class Team(val name: String, var logo: String)
+data class Team(val name: String, val logo: String)

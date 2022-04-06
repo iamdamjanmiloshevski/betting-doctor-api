@@ -22,20 +22,11 @@
  * SOFTWARE.
  */
 
-package com.twoplaylabs.data
-
-import kotlinx.serialization.SerialName
-import org.bson.types.ObjectId
-import java.util.*
+package com.twoplaylabs.data.auth
 
 /*
     Author: Damjan Miloshevski 
-    Created on 25/12/2021
+    Created on 24/06/2021
     Project: betting-doctor
 */
-data class Ticket(
-    @SerialName("_id")
-    val _id: String = ObjectId().toString(),
-    val date:Date = Date(),
-    val tips: List<BettingTip>
-)
+data class AccessToken(val token: String, val refreshToken: String, val expiresIn: Long)

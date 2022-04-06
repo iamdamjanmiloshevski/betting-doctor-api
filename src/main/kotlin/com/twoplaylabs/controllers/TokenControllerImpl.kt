@@ -22,20 +22,27 @@
  * SOFTWARE.
  */
 
-package com.twoplaylabs.data
+package com.twoplaylabs.controllers
 
-import kotlinx.serialization.SerialName
-import org.bson.types.ObjectId
-import java.util.*
+import com.twoplaylabs.data.Token
+import com.twoplaylabs.repository.TokensRepository
+import org.koin.java.KoinJavaComponent.inject
 
 /*
     Author: Damjan Miloshevski 
-    Created on 25/12/2021
+    Created on 06/04/2022
     Project: betting-doctor
 */
-data class Ticket(
-    @SerialName("_id")
-    val _id: String = ObjectId().toString(),
-    val date:Date = Date(),
-    val tips: List<BettingTip>
-)
+class TokenControllerImpl(private val repository: TokensRepository) : TokenController {
+    override suspend fun insertToken(userEmail: String, token: String) = repository.insertToken(userEmail, token)
+
+    override suspend fun updateToken(token: Token): Long = repository.updateToken(token)
+
+    override suspend fun findTokensByEmail(email: String): Token? = repository.findTokensByEmail(email)
+
+    override suspend fun findAllTokens(): List<Token> = repository.findAllTokens()
+
+    override suspend fun deleteToken(userEmail: String, token: String): Long = repository.deleteToken(userEmail, token)
+
+    override suspend fun deleteAllTokens(): Long = repository.deleteAllTokens()
+}

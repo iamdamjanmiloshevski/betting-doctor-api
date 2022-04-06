@@ -33,54 +33,58 @@ import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
+import org.koin.java.KoinJavaComponent.inject
 
 /*
     Author: Damjan Miloshevski 
     Created on 27/12/2021
     Project: betting-doctor
 */
-object BettingTipManager {
+class BettingTipManager(private val teamImageProvider: TeamImageProvider, private val client: HttpClient) {
+    private val gson by inject<GsonUtil>(GsonUtil::class.java)
     suspend fun fetchTeamLogosAndUpdateBettingTip(bettingTip: BettingTip, callback: (BettingTip) -> Unit) {
-        bettingTip.teamHome.logo = getTeamLogo(bettingTip.sport,bettingTip.teamHome)
-        bettingTip.teamAway.logo = getTeamLogo(bettingTip.sport,bettingTip.teamAway)
-        callback.invoke(bettingTip)
+        val teamHomeUpdated = bettingTip.teamHome.copy(logo = getTeamLogo(bettingTip.sport, bettingTip.teamHome))
+        val teamAwayUpdated = bettingTip.teamAway.copy(logo = getTeamLogo(bettingTip.sport, bettingTip.teamAway))
+        val bettingTipUpdated = bettingTip.copy(teamHome = teamHomeUpdated, teamAway = teamAwayUpdated)
+        callback.invoke(bettingTipUpdated)
     }
 
     private suspend fun getTeamLogo(sport: String, team: Team): String {
-        val client = HttpClient()
-        val teamData: SportsApiData?
-        return try {
-            teamData = when (sport) {
-                "Tennis", "tennis" -> {
-                    client.fetchTeamData<PlayerData>(sport, team)
+        client.use {
+            val teamData: SportsApiData?
+            return try {
+                teamData = when (sport) {
+                    "Tennis", "tennis" -> {
+                        it.fetchTeamData<PlayerData>(sport, team)
+                    }
+                    else -> {
+                        it.fetchTeamData<SportsData>(sport, team)
+                    }
                 }
-                else -> {
-                    client.fetchTeamData<SportsData>(sport, team)
-                }
+                teamImageProvider.getTeamImageUrl(team, sport, teamData)
+            } catch (e: Exception) {
+                println(e)
+                ""
             }
-            client.close()
-            TeamImageProvider.getTeamImageUrl(team, sport, teamData)
-        } catch (e: Exception) {
-            println(e)
-            client.close()
-            ""
-
         }
     }
 
-    suspend inline fun <reified T : SportsApiData> HttpClient.fetchTeamData(
+    private suspend inline fun <reified T : SportsApiData> HttpClient.fetchTeamData(
         sport: String,
         team: Team
     ): T {
         val teamResponse: HttpResponse =
             this.get(team.name.createURLForTeamData(sport))
         val teamJson: String = teamResponse.receive()
-        return GsonUtil.deserialize(T::class.java, teamJson)
+        return gson.deserialize(T::class.java, teamJson)
     }
-    fun String.createURLForTeamData(sport: String): String {
+
+    private fun String.createURLForTeamData(sport: String): String {
         return when (sport) {
-            "Tennis", "tennis" -> "https://www.thesportsdb.com/api/v1/json/".plus(System.getenv(Constants.SPORTSDB_API_KEY)).plus("/searchplayers.php?p=${this}")
-            else -> "https://www.thesportsdb.com/api/v1/json/".plus(System.getenv(Constants.SPORTSDB_API_KEY)).plus("/searchteams.php?t=${this}")
+            "Tennis", "tennis" -> "https://www.thesportsdb.com/api/v1/json/".plus(System.getenv(Constants.SPORTSDB_API_KEY))
+                .plus("/searchplayers.php?p=${this}")
+            else -> "https://www.thesportsdb.com/api/v1/json/".plus(System.getenv(Constants.SPORTSDB_API_KEY))
+                .plus("/searchteams.php?t=${this}")
         }
     }
 }

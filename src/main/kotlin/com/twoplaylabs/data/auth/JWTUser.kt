@@ -22,39 +22,16 @@
  * SOFTWARE.
  */
 
-package com.twoplaylabs.util
+package com.twoplaylabs.data.auth
+
 
 import com.google.gson.annotations.SerializedName
-import java.io.InputStream
 
-/*
-    Author: Damjan Miloshevski 
-    Created on 16/09/2021
-    Project: betting-doctor
-*/
-data class FirebaseCredentials(
-    @SerializedName("type")
-    val type: String,
-    @SerializedName("project_id")
-    val project_id: String,
-    @SerializedName("private_key_id")
-    val private_key_id: String,
-    @SerializedName("private_key")
-    val private_key: String,
-    @SerializedName("client_email")
-    val client_email: String,
-    @SerializedName("client_id")
-    val client_id: String,
-    @SerializedName("auth_uri")
-    val auth_uri: String,
-    @SerializedName("token_uri")
-    val token_uri: String,
-    @SerializedName("auth_provider_x509_cert_url")
-    val auth_provider_x509_cert_url: String,
-    @SerializedName("client_x509_cert_url")
-    val client_x509_cert_url: String
+data class JWTUser(
+    @SerializedName("role")
+    val role: String,
+    @SerializedName("_id")
+    val id: String,
+    @SerializedName("isAccountVerified")
+    val isAccountVerified: Boolean
 )
-fun FirebaseCredentials.toInputStream():InputStream{
-    val json = GsonUtil.serialize(FirebaseCredentials::class.java,this)
-    return json.byteInputStream()
-}

@@ -22,20 +22,49 @@
  * SOFTWARE.
  */
 
-package com.twoplaylabs.data
+package com.twoplaylabs.routes
 
-import kotlinx.serialization.SerialName
-import org.bson.types.ObjectId
-import java.util.*
+import io.ktor.application.*
+import io.ktor.html.*
+import io.ktor.http.*
+import io.ktor.routing.*
+import kotlinx.html.body
+import kotlinx.html.h1
+import kotlinx.html.head
+import kotlinx.html.title
 
 /*
     Author: Damjan Miloshevski 
-    Created on 25/12/2021
+    Created on 05/04/2022
     Project: betting-doctor
 */
-data class Ticket(
-    @SerialName("_id")
-    val _id: String = ObjectId().toString(),
-    val date:Date = Date(),
-    val tips: List<BettingTip>
-)
+fun Application.healthCheckRoutes(){
+    routing {
+        get("/") {
+            val name = "Betting Doctor"
+            call.respondHtml(HttpStatusCode.OK) {
+                head {
+                    title { +name }
+                }
+                body {
+                    h1 {
+                        +"Doctor Betting API health check: Success"
+                    }
+                }
+            }
+        }
+        get("/health-check") {
+            val name = "Betting Doctor"
+            call.respondHtml(HttpStatusCode.OK) {
+                head {
+                    title { +name }
+                }
+                body {
+                    h1 {
+                        +"Health check: Success"
+                    }
+                }
+            }
+        }
+    }
+}

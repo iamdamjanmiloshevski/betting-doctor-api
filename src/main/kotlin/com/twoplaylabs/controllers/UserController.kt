@@ -22,34 +22,29 @@
  * SOFTWARE.
  */
 
-package com.twoplaylabs.util
+package com.twoplaylabs.controllers
 
-import com.auth0.jwt.interfaces.DecodedJWT
-import com.twoplaylabs.auth.JWTHeader
-import com.twoplaylabs.auth.JWTPayload
-import java.util.*
+import com.twoplaylabs.data.FeedbackMessage
+import com.twoplaylabs.data.User
 
 /*
     Author: Damjan Miloshevski 
-    Created on 09/07/2021
+    Created on 05/04/2022
     Project: betting-doctor
 */
-object JWTDecoder {
-    fun decodeJWT(decodedJWT: DecodedJWT?): Pair<JWTHeader, JWTPayload> {
-        decodedJWT?.let {
-            try {
-                val decoder = Base64.getDecoder()
+interface UserController {
+    suspend fun insertUser(user: User)
+    suspend fun insertFeedback(feedbackMessage: FeedbackMessage)
 
-                val header = String(decoder.decode(decodedJWT.header))
-                val payload = String(decoder.decode(decodedJWT.payload))
+    suspend fun updateUser(user: User): Long
+    suspend fun updateUserPassword(id: String, hashedPassword: String): Long
 
-                val jwtHeader = GsonUtil.deserialize(JWTHeader::class.java, header)
-                val jwtPayload = GsonUtil.deserialize(JWTPayload::class.java, payload)
+    suspend fun verifyUserAccount(id:String):Long
 
-                return Pair(jwtHeader, jwtPayload)
-            } catch (e: Exception) {
-                throw Exception("Token is invalid!")
-            }
-        } ?: throw Exception("Please provide a valid token!")
-    }
+    suspend fun findUserByEmail(email: String): User?
+    suspend fun findUserById(id: String): User?
+    suspend fun findAllUsers(): List<User>
+
+    suspend fun deleteUserById(id: String): Long
+    suspend fun deleteAllUsers(): Long
 }

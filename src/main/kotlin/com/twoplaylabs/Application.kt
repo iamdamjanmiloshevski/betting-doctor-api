@@ -24,26 +24,16 @@
 
 package com.twoplaylabs
 
-import com.google.auth.oauth2.GoogleCredentials
-import com.google.firebase.FirebaseApp
-import com.google.firebase.FirebaseOptions
-import com.twoplaylabs.modules.doctorbetting.doctorBettingModule
-import com.twoplaylabs.modules.sportsanalyst.sportsAnalystModule
+
+import com.twoplaylabs.modules.doctorbetting.installDoctorBettingModule
+import com.twoplaylabs.modules.sportsanalyst.installSportsAnalystModule
+import com.twoplaylabs.plugins.configureDependencyInjection
+import com.twoplaylabs.plugins.healthCheckService
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
-import com.twoplaylabs.util.AuthUtil.retrieveFirebaseCredentials
-import com.twoplaylabs.util.Constants
 import com.twoplaylabs.util.Constants.PORT
-import com.twoplaylabs.util.toInputStream
 import io.ktor.application.*
 import io.ktor.features.*
-import io.ktor.html.*
-import io.ktor.http.*
-import io.ktor.routing.*
-import kotlinx.html.body
-import kotlinx.html.h1
-import kotlinx.html.head
-import kotlinx.html.title
 
 
 fun main() {
@@ -51,47 +41,10 @@ fun main() {
     embeddedServer(Netty, port = httpPort) {
         install(CallLogging)
         install(DefaultHeaders)
-        healthCheck()
-        doctorBettingModule()
-        sportsAnalystModule()
+        configureDependencyInjection()
+        healthCheckService()
+        installDoctorBettingModule()
+        installSportsAnalystModule()
     }.start(wait = true)
 }
 
-private fun Application.healthCheck() {
-    routing {
-        get("/") {
-            val name = "Betting Doctor"
-            call.respondHtml(HttpStatusCode.OK) {
-                head {
-                    title { +name }
-                }
-                body {
-                    h1 {
-                        +"Doctor Betting API health check: Success"
-                    }
-                }
-            }
-        }
-        get("/health-check") {
-            val name = "Betting Doctor"
-            call.respondHtml(HttpStatusCode.OK) {
-                head {
-                    title { +name }
-                }
-                body {
-                    h1 {
-                        +"Health check: Success"
-                    }
-                }
-            }
-        }
-    }
-}
-
-fun configureFirebase() {
-    val options = FirebaseOptions.builder()
-        .setCredentials(GoogleCredentials.fromStream(retrieveFirebaseCredentials().toInputStream()))
-        .setStorageBucket(System.getenv(Constants.FIREBASE_STORAGE_BUCKET_URL))
-        .build()
-    FirebaseApp.initializeApp(options)
-}

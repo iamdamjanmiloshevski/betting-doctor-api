@@ -22,20 +22,24 @@
  * SOFTWARE.
  */
 
-package com.twoplaylabs.data
+package com.twoplaylabs.controllers
 
-import kotlinx.serialization.SerialName
-import org.bson.types.ObjectId
-import java.util.*
+import com.twoplaylabs.data.BettingTip
 
 /*
     Author: Damjan Miloshevski 
-    Created on 25/12/2021
+    Created on 05/04/2022
     Project: betting-doctor
 */
-data class Ticket(
-    @SerialName("_id")
-    val _id: String = ObjectId().toString(),
-    val date:Date = Date(),
-    val tips: List<BettingTip>
-)
+interface BettingTipsController {
+    suspend fun insertBettingTip(bettingTip: BettingTip)
+
+    suspend fun findAllBettingTips(): List<BettingTip>
+    suspend fun findBettingTipById(id: String): BettingTip?
+    suspend fun findBettingTipsBySport(sport: String, upcoming: Boolean): List<BettingTip>
+
+    suspend fun updateBettingTip(bettingTip: BettingTip): Long
+
+    suspend fun deleteAllBettingTips(): Long
+    suspend fun deleteBettingTip(id: String): Long
+}

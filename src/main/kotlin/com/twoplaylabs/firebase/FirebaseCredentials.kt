@@ -22,20 +22,42 @@
  * SOFTWARE.
  */
 
-package com.twoplaylabs.data
+package com.twoplaylabs.firebase
 
-import kotlinx.serialization.SerialName
-import org.bson.types.ObjectId
-import java.util.*
+import com.google.gson.annotations.SerializedName
+import com.twoplaylabs.util.GsonUtil
+import org.koin.java.KoinJavaComponent.inject
+import java.io.InputStream
 
 /*
     Author: Damjan Miloshevski 
-    Created on 25/12/2021
+    Created on 16/09/2021
     Project: betting-doctor
 */
-data class Ticket(
-    @SerialName("_id")
-    val _id: String = ObjectId().toString(),
-    val date:Date = Date(),
-    val tips: List<BettingTip>
+data class FirebaseCredentials(
+    @SerializedName("type")
+    val type: String,
+    @SerializedName("project_id")
+    val project_id: String,
+    @SerializedName("private_key_id")
+    val private_key_id: String,
+    @SerializedName("private_key")
+    val private_key: String,
+    @SerializedName("client_email")
+    val client_email: String,
+    @SerializedName("client_id")
+    val client_id: String,
+    @SerializedName("auth_uri")
+    val auth_uri: String,
+    @SerializedName("token_uri")
+    val token_uri: String,
+    @SerializedName("auth_provider_x509_cert_url")
+    val auth_provider_x509_cert_url: String,
+    @SerializedName("client_x509_cert_url")
+    val client_x509_cert_url: String
 )
+fun FirebaseCredentials.toInputStream():InputStream{
+    val gson by inject<GsonUtil>(GsonUtil::class.java)
+    val json = gson.serialize(FirebaseCredentials::class.java,this)
+    return json.byteInputStream()
+}

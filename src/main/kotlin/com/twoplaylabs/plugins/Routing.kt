@@ -25,36 +25,39 @@
 package com.twoplaylabs.plugins
 
 import com.twoplaylabs.auth.JWTService
-import com.twoplaylabs.controllers.bettingTicketRouter
+import com.twoplaylabs.controllers.*
 import com.twoplaylabs.repository.BettingTipsRepository
 import com.twoplaylabs.repository.UsersRepository
-import com.twoplaylabs.controllers.bettingTipsRouter
-import com.twoplaylabs.controllers.usersRouter
 import com.twoplaylabs.repository.TicketsRepository
 import com.twoplaylabs.repository.TokensRepository
+import com.twoplaylabs.routes.*
 import io.ktor.routing.*
 import io.ktor.application.*
+import io.ktor.html.*
+import io.ktor.http.*
+import org.koin.ktor.ext.inject
 
-fun Application.doctorBettingService(
-    bettingTipsRepository: BettingTipsRepository,
-    usersRepository: UsersRepository,
-    tokensRepository: TokensRepository,
-    jwtService: JWTService
-) {
+fun Application.doctorBettingService() {
+    val controller by inject<BettingTipsController>()
+    val userController by inject<UserController>()
+    val tokenController by inject<TokenController>()
     routing {
-        bettingTipsRouter(bettingTipsRepository)
-        usersRouter(usersRepository, tokensRepository,jwtService)
-
+        bettingTipsController(controller)
+        userController(userController,tokenController)
+        tokenController(tokenController)
     }
 }
 
-fun Application.sportsAnalystService(
-    ticketsRepository: TicketsRepository,
-    usersRepository: UsersRepository,
-    jwtService: JWTService
-){
+
+fun Application.healthCheckService(){
     routing {
-        bettingTicketRouter(ticketsRepository)
+        healthCheckRoutes()
+    }
+}
+fun Application.sportsAnalystService(){
+    val controller by inject<TicketController>()
+    routing {
+        ticketsController(controller)
     }
 }
 

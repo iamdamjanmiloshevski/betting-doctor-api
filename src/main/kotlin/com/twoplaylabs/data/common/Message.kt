@@ -22,11 +22,13 @@
  * SOFTWARE.
  */
 
-package com.twoplaylabs.auth
+package com.twoplaylabs.data.common
+
+import java.util.*
 
 /*
     Author: Damjan Miloshevski 
-    Created on 24/06/2021
+    Created on 25/06/2021
     Project: betting-doctor
 */
-data class AccessToken(val token: String, val refreshToken: String, val expiresIn: Long)
+data class Message(val message: String, val code: Int,val date: Date = Date())

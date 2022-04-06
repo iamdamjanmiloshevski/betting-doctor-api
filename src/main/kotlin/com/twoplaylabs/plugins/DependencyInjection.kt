@@ -22,20 +22,30 @@
  * SOFTWARE.
  */
 
-package com.twoplaylabs.data
+package com.twoplaylabs.plugins
 
-import kotlinx.serialization.SerialName
-import org.bson.types.ObjectId
-import java.util.*
+import com.twoplaylabs.di.*
+import io.ktor.application.*
+import org.koin.ktor.ext.Koin
+import org.koin.ktor.ext.modules
+
 
 /*
     Author: Damjan Miloshevski 
-    Created on 25/12/2021
+    Created on 05/04/2022
     Project: betting-doctor
 */
-data class Ticket(
-    @SerialName("_id")
-    val _id: String = ObjectId().toString(),
-    val date:Date = Date(),
-    val tips: List<BettingTip>
-)
+fun Application.configureDependencyInjection() {
+    install(Koin) {
+        modules(
+            databaseModule,
+            repoModule,
+            clientModule,
+            controllersModule,
+            authenticationModule,
+            emailModule,
+            bettingTipsModule,
+            gsonModule
+        )
+    }
+}

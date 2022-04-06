@@ -26,6 +26,7 @@ package com.twoplaylabs.plugins
 
 
 import com.twoplaylabs.auth.JWTService
+import com.twoplaylabs.controllers.UserController
 import com.twoplaylabs.data.UserRole
 import com.twoplaylabs.repository.UsersRepositoryImpl
 import com.twoplaylabs.util.Constants.AUTH_CONFIG_ADMIN
@@ -36,6 +37,7 @@ import com.twoplaylabs.util.toUserRole
 import io.ktor.application.*
 import io.ktor.auth.*
 import io.ktor.auth.jwt.*
+import org.koin.ktor.ext.inject
 
 
 /*
@@ -43,7 +45,10 @@ import io.ktor.auth.jwt.*
     Created on 23/06/2021
     Project: betting-doctor
 */
-fun Application.configureSecurity(jwtService: JWTService, usersRepository: UsersRepositoryImpl) {
+fun Application.configureSecurity() {
+    val jwtService by inject<JWTService>()
+    val userController by inject<UserController>()
+
     install(Authentication) {
         jwt(System.getenv(AUTH_CONFIG_ALL)) {
             verifier(jwtService.verifier())
@@ -52,7 +57,7 @@ fun Application.configureSecurity(jwtService: JWTService, usersRepository: Users
                 if (credential.audience.contains(jwtService.audience())) {
                     val payload = credential.payload
                     val id = payload.getClaim(ID)
-                    return@validate usersRepository.findUserById(id.asString())
+                    return@validate userController.findUserById(id.asString())
                 } else null
             }
         }
@@ -65,7 +70,7 @@ fun Application.configureSecurity(jwtService: JWTService, usersRepository: Users
                     val id = payload.getClaim(ID)
                     val roleId = payload.getClaim(ROLE)
                     if (roleId.asString().toUserRole() == UserRole.ADMIN) {
-                        return@validate usersRepository.findUserById(id.asString())
+                        return@validate userController.findUserById(id.asString())
                     } else null
                 } else null
             }

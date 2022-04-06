@@ -22,20 +22,29 @@
  * SOFTWARE.
  */
 
-package com.twoplaylabs.data
+package com.twoplaylabs.client
 
-import kotlinx.serialization.SerialName
-import org.bson.types.ObjectId
-import java.util.*
+import io.ktor.client.*
+import io.ktor.client.engine.apache.*
+import io.ktor.client.features.json.*
+import java.util.concurrent.TimeUnit
 
 /*
     Author: Damjan Miloshevski 
-    Created on 25/12/2021
+    Created on 05/04/2022
     Project: betting-doctor
 */
-data class Ticket(
-    @SerialName("_id")
-    val _id: String = ObjectId().toString(),
-    val date:Date = Date(),
-    val tips: List<BettingTip>
-)
+val client = HttpClient(Apache) {
+    install(JsonFeature) {
+        serializer = GsonSerializer() {
+            setPrettyPrinting()
+            disableHtmlEscaping()
+        }
+    }
+    engine {
+        // this: ApacheEngineConfig
+        socketTimeout = TimeUnit.SECONDS.toMillis(10).toInt()
+        connectTimeout = TimeUnit.SECONDS.toMillis(10).toInt()
+        connectionRequestTimeout = TimeUnit.SECONDS.toMillis(20).toInt()
+    }
+}

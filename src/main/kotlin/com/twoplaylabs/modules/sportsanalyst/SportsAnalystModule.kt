@@ -24,9 +24,6 @@
 
 package com.twoplaylabs.modules.sportsanalyst
 
-import com.twoplaylabs.modules.ModuleDependenciesProvider.jwtService
-import com.twoplaylabs.modules.ModuleDependenciesProvider.ticketsRepository
-import com.twoplaylabs.modules.ModuleDependenciesProvider.usersRepository
 import com.twoplaylabs.plugins.sportsAnalystService
 import io.ktor.application.*
 
@@ -35,10 +32,6 @@ import io.ktor.application.*
     Created on 13/12/2021
     Project: betting-doctor
 */
-fun Application.sportsAnalystModule(){
-    sportsAnalystService(
-        ticketsRepository,
-        usersRepository,
-        jwtService
-    )
+fun Application.installSportsAnalystModule(){
+    sportsAnalystService()
 }

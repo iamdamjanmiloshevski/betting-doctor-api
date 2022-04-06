@@ -24,7 +24,7 @@
 
 package com.twoplaylabs.util
 
-import com.twoplaylabs.auth.AccessToken
+import com.twoplaylabs.data.auth.AccessToken
 import com.twoplaylabs.auth.JWTService
 import com.twoplaylabs.data.User
 import com.twoplaylabs.util.Constants.FIREBASE_AUTH_PROVIDER_x509_CERT_URL
@@ -37,10 +37,10 @@ import com.twoplaylabs.util.Constants.FIREBASE_PRIVATE_KEY_ID
 import com.twoplaylabs.util.Constants.FIREBASE_PROJECT_ID
 import com.twoplaylabs.util.Constants.FIREBASE_TOKEN_URI
 import com.twoplaylabs.util.Constants.FIREBASE_TYPE
+import org.koin.java.KoinJavaComponent.inject
 import org.threeten.bp.LocalDateTime
 import org.threeten.bp.ZoneOffset
 import java.util.*
-import java.util.concurrent.TimeUnit
 
 /*
     Author: Damjan Miloshevski 
@@ -49,16 +49,10 @@ import java.util.concurrent.TimeUnit
 */
 object AuthUtil {
     fun String.generateWelcomeUrl() = System.getenv(Constants.API_BASE_URL).plus("/users/verify/${this}")
-
-    fun isRefreshTokenValid(expiresAt: Long): Boolean {
-        val currentDate = LocalDateTime.now()
-        val tokenExpiryDate = LocalDateTime.ofEpochSecond(expiresAt, 0, ZoneOffset.UTC)
-        return tokenExpiryDate.isAfter(currentDate)
-    }
+    private val jwtService by inject<JWTService>(JWTService::class.java)
 
     fun generateAccessToken(
         user: User,
-        jwtService: JWTService,
         expiresAt: Date = jwtService.expiresAt()
     ): AccessToken {
         val expiresAtInMillis = expiresAt.time
@@ -66,34 +60,6 @@ object AuthUtil {
             jwtService.generateToken(expiresAt, user),
             UUID.randomUUID().toString(),
             expiresAtInMillis
-        )
-    }
-
-
-
-    fun retrieveFirebaseCredentials(): FirebaseCredentials {
-        val serviceAccount = System.getenv(FIREBASE_TYPE)
-        val projectId = System.getenv(FIREBASE_PROJECT_ID)
-        val privateKeyId = System.getenv(FIREBASE_PRIVATE_KEY_ID)
-        val privateKey = System.getenv(FIREBASE_PRIVATE_KEY).replace("\\n", "\n")
-        val email = System.getenv(FIREBASE_CLIENT_EMAIL)
-        val clientId = System.getenv(FIREBASE_CLIENT_ID)
-        val authUri = System.getenv(FIREBASE_AUTH_URI)
-        val tokenUri = System.getenv(FIREBASE_TOKEN_URI)
-        val authProviderx509CertUrl = System.getenv(FIREBASE_AUTH_PROVIDER_x509_CERT_URL)
-        val clientX509CertUrl = System.getenv(FIREBASE_CLIENT_x509_CERT_URL)
-
-        return FirebaseCredentials(
-            serviceAccount,
-            projectId,
-            privateKeyId,
-            privateKey,
-            email,
-            clientId,
-            authUri,
-            tokenUri,
-            authProviderx509CertUrl,
-            clientX509CertUrl
         )
     }
 }

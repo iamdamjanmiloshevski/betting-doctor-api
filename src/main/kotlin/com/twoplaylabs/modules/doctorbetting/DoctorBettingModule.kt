@@ -24,27 +24,24 @@
 
 package com.twoplaylabs.modules.doctorbetting
 
-import com.twoplaylabs.configureFirebase
-import com.twoplaylabs.modules.ModuleDependenciesProvider.bettingTipsRepository
-import com.twoplaylabs.modules.ModuleDependenciesProvider.jwtService
-import com.twoplaylabs.modules.ModuleDependenciesProvider.tokensRepository
-import com.twoplaylabs.modules.ModuleDependenciesProvider.usersRepository
-import com.twoplaylabs.plugins.configureErrorHandling
-import com.twoplaylabs.plugins.doctorBettingService
-import com.twoplaylabs.plugins.configureSecurity
-import com.twoplaylabs.plugins.configureSerialization
+import com.twoplaylabs.auth.JWTService
+import com.twoplaylabs.firebase.FirebaseManager
+import com.twoplaylabs.plugins.*
 
 import io.ktor.application.*
+import org.koin.ktor.ext.inject
 
 /*
     Author: Damjan Miloshevski 
     Created on 13/12/2021
     Project: betting-doctor
 */
-fun Application.doctorBettingModule(){
-    configureFirebase()
-    configureSecurity(jwtService, usersRepository)
-    doctorBettingService(bettingTipsRepository, usersRepository, tokensRepository, jwtService)
+fun Application.installDoctorBettingModule(){
+    val firebaseManager by inject<FirebaseManager>()
+    firebaseManager.configureFirebase()
+    configureSecurity()
+    doctorBettingService()
     configureErrorHandling()
     configureSerialization()
 }
+

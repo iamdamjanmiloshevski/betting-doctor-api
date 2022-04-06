@@ -22,16 +22,26 @@
  * SOFTWARE.
  */
 
-package com.twoplaylabs.auth
+package com.twoplaylabs.controllers
 
+import com.twoplaylabs.data.Ticket
+import java.util.*
 
-import com.google.gson.annotations.SerializedName
+/*
+    Author: Damjan Miloshevski 
+    Created on 05/04/2022
+    Project: betting-doctor
+*/
+interface TicketController {
+    suspend fun insertTicket(ticket: Ticket)
 
-data class JWTUser(
-    @SerializedName("role")
-    val role: String,
-    @SerializedName("_id")
-    val id: String,
-    @SerializedName("isAccountVerified")
-    val isAccountVerified: Boolean
-)
+    suspend fun findAllTickets():List<Ticket>
+    suspend fun findTicketById(id:String): Ticket?
+    suspend fun findTicketByDate(date: Date): Ticket?
+
+    suspend fun updateTicket(ticket: Ticket):Long
+
+    suspend fun deleteAllTickets():Long
+    suspend fun deleteTicket(id:String):Long
+    suspend fun deleteTicket(date: Date):Long
+}

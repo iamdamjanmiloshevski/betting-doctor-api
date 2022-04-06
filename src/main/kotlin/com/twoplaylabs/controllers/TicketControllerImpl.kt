@@ -22,13 +22,33 @@
  * SOFTWARE.
  */
 
-package com.twoplaylabs.common
+package com.twoplaylabs.controllers
 
+import com.twoplaylabs.data.Ticket
+import com.twoplaylabs.repository.TicketsRepository
+import org.koin.java.KoinJavaComponent.inject
 import java.util.*
 
 /*
     Author: Damjan Miloshevski 
-    Created on 25/06/2021
+    Created on 05/04/2022
     Project: betting-doctor
 */
-data class Message(val message: String, val code: Int,val date: Date = Date())
+class TicketControllerImpl(private val repository: TicketsRepository) : TicketController {
+
+    override suspend fun insertTicket(ticket: Ticket) = repository.insertTicket(ticket)
+
+    override suspend fun findAllTickets(): List<Ticket> = repository.findAllTickets()
+
+    override suspend fun findTicketById(id: String): Ticket? = repository.findTicketById(id)
+
+    override suspend fun findTicketByDate(date: Date): Ticket? = repository.findTicketByDate(date)
+
+    override suspend fun updateTicket(ticket: Ticket): Long = repository.updateTicket(ticket)
+
+    override suspend fun deleteAllTickets(): Long = repository.deleteAllTickets()
+
+    override suspend fun deleteTicket(id: String): Long = repository.deleteTicket(id)
+
+    override suspend fun deleteTicket(date: Date): Long = repository.deleteTicket(date)
+}

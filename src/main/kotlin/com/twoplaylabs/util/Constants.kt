@@ -69,8 +69,8 @@ object Constants {
     const val PUSH_NOTIFICATIONS = "/notifications"
     const val TICKETS_ROUTE = "/api/v1/betting-tickets"
     const val SEARCH_ROUTE = "/search"
-    const val TOKENS_ROUTE = "/tokens"
-    const val TOKEN_REJECT_ROUTE = "/token/reject"
+    const val TOKENS_ROUTE = "${API_PREFIX}/tokens"
+    const val TOKEN_REJECT_ROUTE = "/reject"
     //endregion
 
     //region https messages

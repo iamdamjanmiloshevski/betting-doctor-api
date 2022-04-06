@@ -22,20 +22,31 @@
  * SOFTWARE.
  */
 
-package com.twoplaylabs.data
+package com.twoplaylabs.controllers
 
-import kotlinx.serialization.SerialName
-import org.bson.types.ObjectId
-import java.util.*
+import com.twoplaylabs.data.BettingTip
+import com.twoplaylabs.repository.BettingTipsRepository
+import org.koin.java.KoinJavaComponent.inject
 
 /*
     Author: Damjan Miloshevski 
-    Created on 25/12/2021
+    Created on 05/04/2022
     Project: betting-doctor
 */
-data class Ticket(
-    @SerialName("_id")
-    val _id: String = ObjectId().toString(),
-    val date:Date = Date(),
-    val tips: List<BettingTip>
-)
+class BettingTipsControllerImpl(private val repository: BettingTipsRepository) : BettingTipsController {
+
+    override suspend fun insertBettingTip(bettingTip: BettingTip) = repository.insertBettingTip(bettingTip)
+
+    override suspend fun findAllBettingTips(): List<BettingTip> = repository.findAllBettingTips()
+
+    override suspend fun findBettingTipById(id: String): BettingTip? = repository.findBettingTipById(id)
+
+    override suspend fun findBettingTipsBySport(sport: String, upcoming: Boolean): List<BettingTip> =
+        repository.findBettingTipsBySport(sport, upcoming)
+
+    override suspend fun updateBettingTip(bettingTip: BettingTip): Long = repository.updateBettingTip(bettingTip)
+
+    override suspend fun deleteAllBettingTips(): Long = repository.deleteAllBettingTips()
+
+    override suspend fun deleteBettingTip(id: String): Long = repository.deleteBettingTip(id)
+}
