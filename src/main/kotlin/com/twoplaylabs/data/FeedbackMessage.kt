@@ -24,8 +24,7 @@
 
 package com.twoplaylabs.data
 
-import kotlinx.serialization.SerialName
-import org.threeten.bp.ZonedDateTime
+
 import java.util.*
 
 /*
@@ -34,6 +33,5 @@ import java.util.*
     Project: betting-doctor
 */
 data class FeedbackMessage(
-    @SerialName("_id")
     val _id: String, val name: String, val email: String, val message: String, val createdAt: Date
 )

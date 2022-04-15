@@ -29,15 +29,13 @@ import com.twoplaylabs.data.RefreshToken
 import com.twoplaylabs.data.common.Message
 import com.twoplaylabs.util.Constants
 import com.twoplaylabs.util.Constants.TOKEN_REJECT_ROUTE
-import io.ktor.application.*
-import io.ktor.auth.*
 import io.ktor.http.*
-import io.ktor.request.*
-import io.ktor.response.*
-import io.ktor.routing.*
-import io.ktor.routing.application
-import org.apache.http.impl.auth.BasicScheme.authenticate
-import org.koin.ktor.ext.inject
+import io.ktor.server.application.*
+import io.ktor.server.auth.*
+import io.ktor.server.request.*
+import io.ktor.server.response.*
+import io.ktor.server.routing.*
+
 
 /*
     Author: Damjan Miloshevski 

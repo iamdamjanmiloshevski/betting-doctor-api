@@ -34,6 +34,7 @@ import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import org.koin.java.KoinJavaComponent.inject
+import java.net.URLEncoder
 
 /*
     Author: Damjan Miloshevski 
@@ -50,23 +51,23 @@ class BettingTipManager(private val teamImageProvider: TeamImageProvider, privat
     }
 
     private suspend fun getTeamLogo(sport: String, team: Team): String {
-        client.use {
             val teamData: SportsApiData?
-            return try {
-                teamData = when (sport) {
-                    "Tennis", "tennis" -> {
-                        it.fetchTeamData<PlayerData>(sport, team)
+            with(client){
+                return try {
+                    teamData = when (sport) {
+                        "Tennis", "tennis" -> {
+                            this.fetchTeamData<PlayerData>(sport, team)
+                        }
+                        else -> {
+                            this.fetchTeamData<SportsData>(sport, team)
+                        }
                     }
-                    else -> {
-                        it.fetchTeamData<SportsData>(sport, team)
-                    }
+                    teamImageProvider.getTeamImageUrl(team, sport, teamData)
+                } catch (e: Exception) {
+                    println(e)
+                    ""
                 }
-                teamImageProvider.getTeamImageUrl(team, sport, teamData)
-            } catch (e: Exception) {
-                println(e)
-                ""
             }
-        }
     }
 
     private suspend inline fun <reified T : SportsApiData> HttpClient.fetchTeamData(
@@ -75,16 +76,16 @@ class BettingTipManager(private val teamImageProvider: TeamImageProvider, privat
     ): T {
         val teamResponse: HttpResponse =
             this.get(team.name.createURLForTeamData(sport))
-        val teamJson: String = teamResponse.receive()
+        val teamJson: String = teamResponse.body()
         return gson.deserialize(T::class.java, teamJson)
     }
 
     private fun String.createURLForTeamData(sport: String): String {
         return when (sport) {
             "Tennis", "tennis" -> "https://www.thesportsdb.com/api/v1/json/".plus(System.getenv(Constants.SPORTSDB_API_KEY))
-                .plus("/searchplayers.php?p=${this}")
+                .plus("/searchplayers.php?p=${URLEncoder.encode(this,"UTF-8")}")
             else -> "https://www.thesportsdb.com/api/v1/json/".plus(System.getenv(Constants.SPORTSDB_API_KEY))
-                .plus("/searchteams.php?t=${this}")
+                .plus("/searchteams.php?t=${URLEncoder.encode(this,"UTF-8")}")
         }
     }
 }

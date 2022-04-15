@@ -26,7 +26,8 @@ package com.twoplaylabs.client
 
 import io.ktor.client.*
 import io.ktor.client.engine.apache.*
-import io.ktor.client.features.json.*
+import io.ktor.client.plugins.contentnegotiation.*
+import io.ktor.serialization.gson.*
 import java.util.concurrent.TimeUnit
 
 /*
@@ -35,8 +36,8 @@ import java.util.concurrent.TimeUnit
     Project: betting-doctor
 */
 val client = HttpClient(Apache) {
-    install(JsonFeature) {
-        serializer = GsonSerializer() {
+    install(ContentNegotiation){
+        gson {
             setPrettyPrinting()
             disableHtmlEscaping()
         }

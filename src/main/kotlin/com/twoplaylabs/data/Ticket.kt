@@ -24,7 +24,6 @@
 
 package com.twoplaylabs.data
 
-import kotlinx.serialization.SerialName
 import org.bson.types.ObjectId
 import java.util.*
 
@@ -34,7 +33,6 @@ import java.util.*
     Project: betting-doctor
 */
 data class Ticket(
-    @SerialName("_id")
     val _id: String = ObjectId().toString(),
     val date:Date = Date(),
     val tips: List<BettingTip>

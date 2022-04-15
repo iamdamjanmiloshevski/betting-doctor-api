@@ -32,15 +32,14 @@ import com.twoplaylabs.plugins.healthCheckService
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import com.twoplaylabs.util.Constants.PORT
-import io.ktor.application.*
-import io.ktor.features.*
+import io.ktor.server.application.*
+import io.ktor.server.plugins.callloging.*
 
 
 fun main() {
-    val httpPort = System.getenv(PORT)?.toInt() ?: 8080
+    val httpPort = System.getenv(PORT)?.toInt() ?: 8082
     embeddedServer(Netty, port = httpPort) {
         install(CallLogging)
-        install(DefaultHeaders)
         configureDependencyInjection()
         healthCheckService()
         installDoctorBettingModule()

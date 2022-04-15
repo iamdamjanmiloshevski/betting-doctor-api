@@ -24,9 +24,7 @@
 
 package com.twoplaylabs.data
 
-import io.ktor.auth.*
-import kotlinx.serialization.Contextual
-import kotlinx.serialization.SerialName
+import io.ktor.server.auth.*
 import java.util.*
 
 /*
@@ -35,7 +33,6 @@ import java.util.*
     Project: betting-doctor
 */
 data class User(
-    @SerialName("_id")
     val _id: String,
     val name: String,
     val surname: String="",
@@ -43,7 +40,6 @@ data class User(
     val email: String="",
     val hashedPassword: String="",
     val isAccountVerified:Boolean = false,
-    @Contextual
     val lastSignedIn:Date = Date(),
     val role:UserRole = UserRole.CUSTOMER
-):Principal
+): Principal

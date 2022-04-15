@@ -24,11 +24,11 @@
 
 package com.twoplaylabs.modules.doctorbetting
 
-import com.twoplaylabs.auth.JWTService
 import com.twoplaylabs.firebase.FirebaseManager
 import com.twoplaylabs.plugins.*
+import io.ktor.server.application.*
+import org.koin.java.KoinJavaComponent.inject
 
-import io.ktor.application.*
 import org.koin.ktor.ext.inject
 
 /*

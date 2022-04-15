@@ -30,14 +30,14 @@ import com.twoplaylabs.data.common.Message
 import com.twoplaylabs.util.BettingTipManager
 import com.twoplaylabs.util.Constants
 import com.twoplaylabs.util.toDateFromQueryParam
-import io.ktor.application.*
-import io.ktor.auth.*
 import io.ktor.http.*
-import io.ktor.request.*
-import io.ktor.response.*
-import io.ktor.routing.*
+import io.ktor.server.application.*
+import io.ktor.server.auth.*
+import io.ktor.server.request.*
+import io.ktor.server.response.*
+import io.ktor.server.routing.*
 import org.bson.types.ObjectId
-import org.koin.ktor.ext.inject
+import org.koin.java.KoinJavaComponent.inject
 
 /*
     Author: Damjan Miloshevski 
@@ -45,7 +45,7 @@ import org.koin.ktor.ext.inject
     Project: betting-doctor
 */
 fun Route.ticketsController(controller: TicketController){
-    val bettingTipsManager by inject<BettingTipManager>()
+    val bettingTipsManager by inject<BettingTipManager>(BettingTipManager::class.java)
     route(Constants.TICKETS_ROUTE) {
         authenticate(System.getenv(Constants.AUTH_CONFIG_ADMIN)) {
             createTicket(bettingTipsManager, controller)

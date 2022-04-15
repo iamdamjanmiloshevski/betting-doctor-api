@@ -32,14 +32,14 @@ import com.twoplaylabs.data.common.Message
 import com.twoplaylabs.util.BettingTipManager
 import com.twoplaylabs.util.Constants
 import com.twoplaylabs.util.convertIfSoccer
-import io.ktor.application.*
-import io.ktor.auth.*
 import io.ktor.http.*
-import io.ktor.request.*
-import io.ktor.response.*
-import io.ktor.routing.*
+import io.ktor.server.application.*
+import io.ktor.server.auth.*
+import io.ktor.server.request.*
+import io.ktor.server.response.*
+import io.ktor.server.routing.*
 import kotlinx.coroutines.runBlocking
-import org.koin.ktor.ext.inject
+import org.koin.java.KoinJavaComponent.inject
 import java.util.*
 
 /*
@@ -49,7 +49,7 @@ import java.util.*
 */
 
 fun Route.bettingTipsController(controller:BettingTipsController){
-    val bettingTipsManager by inject<BettingTipManager>()
+    val bettingTipsManager by inject<BettingTipManager>(BettingTipManager::class.java)
     route(Constants.BETTING_TIPS_ROUTE){
         authenticate(System.getenv(Constants.AUTH_CONFIG_ADMIN)) {
             createBettingTip(bettingTipsManager, controller)

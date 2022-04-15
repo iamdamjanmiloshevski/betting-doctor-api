@@ -24,21 +24,15 @@
 
 package com.twoplaylabs.di
 
-import com.mongodb.client.MongoClient
-import com.mongodb.client.MongoDatabase
+
 import com.twoplaylabs.auth.JWTService
 import com.twoplaylabs.client.client
 import com.twoplaylabs.controllers.*
 import com.twoplaylabs.firebase.FirebaseManager
 import com.twoplaylabs.repository.*
 import com.twoplaylabs.util.*
-import io.ktor.client.*
-import io.ktor.client.engine.apache.*
-import io.ktor.client.features.json.*
-import org.koin.core.scope.get
 import org.koin.dsl.module
 import org.litote.kmongo.KMongo
-import java.util.concurrent.TimeUnit
 
 /*
     Author: Damjan Miloshevski 
@@ -77,7 +71,7 @@ val bettingTipsModule = module {
             get()
         )
     }
-    single { TeamImageProvider }
+    single { TeamImageProvider(get()) }
 }
 
 val gsonModule = module { single { GsonUtil } }

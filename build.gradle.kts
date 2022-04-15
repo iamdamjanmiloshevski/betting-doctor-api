@@ -32,27 +32,42 @@ repositories {
 }
 
 dependencies {
+    //region Server
     implementation("io.ktor:ktor-server-core:$ktor_version")
-    implementation("io.ktor:ktor-auth:$ktor_version")
-    implementation("io.ktor:ktor-auth-jwt:$ktor_version")
-    implementation("io.ktor:ktor-gson:$ktor_version")
-    implementation("io.ktor:ktor-serialization:$ktor_version")
+    implementation("io.ktor:ktor-server-call-logging:$ktor_version")
+    implementation("io.ktor:ktor-server-auth:$ktor_version")
+    implementation("io.ktor:ktor-server-auth-jwt:$ktor_version")
+    implementation("io.ktor:ktor-server-content-negotiation:$ktor_version")
+    implementation("io.ktor:ktor-serialization-gson:$ktor_version")
     implementation("io.ktor:ktor-server-netty:$ktor_version")
-    implementation("io.ktor:ktor-client-core:$ktor_version")
-    implementation("io.ktor:ktor-client-cio:$ktor_version")
-    implementation("io.ktor:ktor-client-gson:$ktor_version")
-    implementation ("io.ktor:ktor-client-apache:$ktor_version")
-    implementation ("io.ktor:ktor-client-serialization:$ktor_version")
-    implementation("io.ktor:ktor-html-builder:$ktor_version")
+    implementation("io.ktor:ktor-server-html-builder:$ktor_version")
+    implementation("io.ktor:ktor-server-status-pages:$ktor_version")
     implementation("ch.qos.logback:logback-classic:$logback_version")
+    //endregion
+
+    //region Client
+    implementation("io.ktor:ktor-client-core:$ktor_version")
+    implementation("io.ktor:ktor-client-content-negotiation:$ktor_version")
+    implementation("io.ktor:ktor-serialization-gson:$ktor_version")
+    implementation ("io.ktor:ktor-client-apache:$ktor_version")
+    implementation("io.ktor:ktor-client-logging:$ktor_version")
+    //endregion
+
+    //Region MongoDB
     implementation("org.litote.kmongo:kmongo:$kmongo_version")
     implementation("org.litote.kmongo:kmongo-async:$kmongo_version")
     implementation("org.litote.kmongo:kmongo-coroutine:$kmongo_version")
     implementation("org.litote.kmongo:kmongo-id:$kmongo_version")
-    implementation("at.favre.lib:bcrypt:$bcrypt_version")
-    implementation("org.apache.commons:commons-email:$apache_commons_version")
     implementation("org.mongodb:mongodb-driver-sync:$mongodb_driver_version")
+    //endregion
+
+    implementation("at.favre.lib:bcrypt:$bcrypt_version")
+
+    implementation("org.apache.commons:commons-email:$apache_commons_version")
+
     implementation("com.google.firebase:firebase-admin:$firebase_admin_version")
+
+    //region Koin
     // Koin Core features
     implementation("io.insert-koin:koin-ktor:$koin_version")
     // Testing
@@ -61,4 +76,5 @@ dependencies {
     // Koin for JUnit 4
     testImplementation ("io.insert-koin:koin-test-junit4:$koin_version")
     testImplementation("io.ktor:ktor-server-tests:$ktor_version")
+    //endregion
 }

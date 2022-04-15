@@ -25,9 +25,7 @@
 package com.twoplaylabs.plugins
 
 import com.twoplaylabs.di.*
-import io.ktor.application.*
-import org.koin.ktor.ext.Koin
-import org.koin.ktor.ext.modules
+import io.ktor.server.application.*
 
 
 /*
@@ -36,16 +34,14 @@ import org.koin.ktor.ext.modules
     Project: betting-doctor
 */
 fun Application.configureDependencyInjection() {
-    install(Koin) {
-        modules(
-            databaseModule,
+    install(Koin){
+        modules = arrayListOf(  databaseModule,
             repoModule,
             clientModule,
             controllersModule,
             authenticationModule,
             emailModule,
             bettingTipsModule,
-            gsonModule
-        )
+            gsonModule)
     }
 }

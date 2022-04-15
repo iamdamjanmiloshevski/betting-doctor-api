@@ -25,7 +25,7 @@
 package com.twoplaylabs.modules.sportsanalyst
 
 import com.twoplaylabs.plugins.sportsAnalystService
-import io.ktor.application.*
+import io.ktor.server.application.*
 
 /*
     Author: Damjan Miloshevski 

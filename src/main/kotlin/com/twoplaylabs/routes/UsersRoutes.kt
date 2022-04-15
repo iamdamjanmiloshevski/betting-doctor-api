@@ -33,18 +33,16 @@ import com.twoplaylabs.util.AuthUtil
 import com.twoplaylabs.util.AuthUtil.generateWelcomeUrl
 import com.twoplaylabs.util.Constants
 import com.twoplaylabs.util.EmailManager
-import io.ktor.application.*
-import io.ktor.auth.*
-import io.ktor.html.*
 import io.ktor.http.*
-import io.ktor.request.*
-import io.ktor.response.*
-import io.ktor.routing.*
+import io.ktor.server.application.*
+import io.ktor.server.auth.*
+import io.ktor.server.html.*
+import io.ktor.server.request.*
+import io.ktor.server.response.*
+import io.ktor.server.routing.*
 import kotlinx.html.*
-import org.apache.http.impl.auth.BasicScheme.authenticate
 import org.bson.types.ObjectId
-import org.koin.ktor.ext.inject
-import org.litote.kmongo.MongoOperator
+import org.koin.java.KoinJavaComponent.inject
 import java.lang.Exception
 import java.util.*
 
@@ -54,7 +52,7 @@ import java.util.*
     Project: betting-doctor
 */
 fun Route.userController(controller: UserController, tokenController: TokenController) {
-    val emailManager by inject<EmailManager>()
+    val emailManager by inject<EmailManager>(EmailManager::class.java)
     route(Constants.USERS_ROUTE) {
         authenticate(System.getenv(Constants.AUTH_CONFIG_ALL)) {
             getAllUsers(controller)
@@ -172,7 +170,7 @@ private fun Route.refreshToken(
     controller: UserController,
     tokenController: TokenController
 ) {
-    val authUtil by inject<AuthUtil>()
+    val authUtil by inject<AuthUtil>(AuthUtil::class.java)
     post(Constants.REFRESH_TOKEN) {
         val refreshToken = call.receive<RefreshToken>()
         try {
@@ -269,7 +267,7 @@ private fun Route.signIn(
     controller: UserController,
     tokenController: TokenController
 ) {
-    val authUtil by inject<AuthUtil>()
+    val authUtil by inject<AuthUtil>(AuthUtil::class.java)
     post(Constants.SIGN_IN_ROUTE) {
         val userInput = call.receive<UserInput>()
         try {

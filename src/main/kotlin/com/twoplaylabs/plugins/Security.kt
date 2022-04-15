@@ -28,16 +28,15 @@ package com.twoplaylabs.plugins
 import com.twoplaylabs.auth.JWTService
 import com.twoplaylabs.controllers.UserController
 import com.twoplaylabs.data.UserRole
-import com.twoplaylabs.repository.UsersRepositoryImpl
 import com.twoplaylabs.util.Constants.AUTH_CONFIG_ADMIN
 import com.twoplaylabs.util.Constants.AUTH_CONFIG_ALL
 import com.twoplaylabs.util.Constants.ID
 import com.twoplaylabs.util.Constants.ROLE
 import com.twoplaylabs.util.toUserRole
-import io.ktor.application.*
-import io.ktor.auth.*
-import io.ktor.auth.jwt.*
-import org.koin.ktor.ext.inject
+import io.ktor.server.application.*
+import io.ktor.server.auth.*
+import io.ktor.server.auth.jwt.*
+import org.koin.java.KoinJavaComponent.inject
 
 
 /*

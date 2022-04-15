@@ -24,10 +24,10 @@
 
 package com.twoplaylabs.plugins
 
-import io.ktor.application.*
-import io.ktor.features.*
 import io.ktor.http.*
-import io.ktor.response.*
+import io.ktor.server.application.*
+import io.ktor.server.plugins.statuspages.*
+import io.ktor.server.response.*
 
 /*
     Author: Damjan Miloshevski 
@@ -36,7 +36,7 @@ import io.ktor.response.*
 */
 fun Application.configureErrorHandling() {
     install(StatusPages) {
-        exception<Throwable> { throwable ->
+        exception<Throwable> {call, throwable ->
             call.respondText(throwable.localizedMessage, ContentType.Text.Plain, HttpStatusCode.InternalServerError)
         }
     }

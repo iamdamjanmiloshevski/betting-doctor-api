@@ -29,11 +29,12 @@ import com.google.firebase.cloud.StorageClient
 import com.twoplaylabs.data.Team
 import com.twoplaylabs.data.sports.SportsApiData
 import io.ktor.client.*
+import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
+import io.ktor.util.*
 import io.ktor.utils.io.bits.*
-import java.io.ByteArrayInputStream
 import java.util.*
 import java.util.concurrent.TimeUnit
 import kotlin.math.ceil
@@ -43,9 +44,8 @@ import kotlin.math.ceil
     Created on 14/09/2021
     Project: betting-doctor
 */
-object TeamImageProvider {
+class TeamImageProvider(private val client: HttpClient) {
     private val bucket = StorageClient.getInstance().bucket()
-
     suspend fun getTeamImageUrl(team: Team, sport: String, sportsApiData: SportsApiData): String {
         val imageName = generateImageName(team, sport)
         val blobInfo = generateImageBlobInfo(imageName)
@@ -62,7 +62,7 @@ object TeamImageProvider {
     }
 
 
-    fun generateImageName(team: Team, sport: String): String {
+    private fun generateImageName(team: Team, sport: String): String {
         val name = team.name.replace("\\s+".toRegex(), "")
         return when (sport) {
             "Soccer", "soccer" -> "football/".plus(name).plus(".jpg")
@@ -78,9 +78,9 @@ object TeamImageProvider {
         return fileUrl.toString()
     }
 
+    @OptIn(InternalAPI::class)
     private suspend fun downloadImage(team: SportsApiData): ByteArray {
-        val httpClient = HttpClient()
-        val statement = httpClient.request<HttpStatement>(team.getLogo())
+        val statement = client.request(team.getLogo()).body<HttpStatement>()
         return statement.execute {
             val contentLength = it.contentLength()?.lowInt ?: 0
             val byteArray = ByteArray(contentLength)
@@ -99,4 +99,5 @@ object TeamImageProvider {
         BlobInfo.newBuilder(BlobId.of(bucket.name, name))
             .setMetadata(mapOf("contentType" to "image/jpeg"))
             .setContentType("image/jpeg").build()
+
 }

@@ -24,18 +24,11 @@
 
 package com.twoplaylabs.plugins
 
-import com.twoplaylabs.auth.JWTService
 import com.twoplaylabs.controllers.*
-import com.twoplaylabs.repository.BettingTipsRepository
-import com.twoplaylabs.repository.UsersRepository
-import com.twoplaylabs.repository.TicketsRepository
-import com.twoplaylabs.repository.TokensRepository
 import com.twoplaylabs.routes.*
-import io.ktor.routing.*
-import io.ktor.application.*
-import io.ktor.html.*
-import io.ktor.http.*
-import org.koin.ktor.ext.inject
+import io.ktor.server.application.*
+import io.ktor.server.routing.*
+import org.koin.java.KoinJavaComponent.inject
 
 fun Application.doctorBettingService() {
     val controller by inject<BettingTipsController>()
@@ -50,9 +43,7 @@ fun Application.doctorBettingService() {
 
 
 fun Application.healthCheckService(){
-    routing {
         healthCheckRoutes()
-    }
 }
 fun Application.sportsAnalystService(){
     val controller by inject<TicketController>()

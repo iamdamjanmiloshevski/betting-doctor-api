@@ -24,13 +24,10 @@
 
 package com.twoplaylabs.plugins
 
-import io.ktor.gson.*
-import io.ktor.features.*
 import io.ktor.serialization.*
-import io.ktor.application.*
-import io.ktor.response.*
-import io.ktor.request.*
-import io.ktor.routing.*
+import io.ktor.serialization.gson.*
+import io.ktor.server.application.*
+import io.ktor.server.plugins.contentnegotiation.*
 import java.text.DateFormat
 
 fun Application.configureSerialization() {
