@@ -62,7 +62,7 @@ class TeamImageProvider(private val client: HttpClient) {
     }
 
 
-    private fun generateImageName(team: Team, sport: String): String {
+     fun generateImageName(team: Team, sport: String): String {
         val name = team.name.replace("\\s+".toRegex(), "")
         return when (sport) {
             "Soccer", "soccer" -> "football/".plus(name).plus(".jpg")

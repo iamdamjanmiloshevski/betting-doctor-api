@@ -25,6 +25,8 @@
 package com.twoplaylabs.util
 
 import com.twoplaylabs.data.Team
+import io.ktor.client.*
+import io.ktor.client.engine.apache.*
 import junit.framework.Assert.assertEquals
 import org.junit.Test
 
@@ -33,53 +35,54 @@ import org.junit.Test
     Created on 14/09/2021
     Project: betting-doctor
 */
-internal class TeamImageProviderTest{
+internal class teamImageProviderTest{
+    private val teamImageProvider = TeamImageProvider(HttpClient(Apache))
     @Test
     fun generateImageName_sportTennisLowerCase_returnsCorrectName() {
         val expected = "tennis/NovakDjokovic.jpeg"
         val teamMock = Team("Novak Djokovic","")
-        assertEquals(expected,TeamImageProvider.generateImageName(team = teamMock,"tennis"))
+        assertEquals(expected,teamImageProvider.generateImageName(team = teamMock,"tennis"))
     }
     @Test
     fun generateImageName_sportTennisUpperCase_returnsCorrectName() {
         val expected = "tennis/NovakDjokovic.jpeg"
         val teamMock = Team("Novak Djokovic","")
-        assertEquals(expected,TeamImageProvider.generateImageName(team = teamMock,"Tennis"))
+        assertEquals(expected,teamImageProvider.generateImageName(team = teamMock,"Tennis"))
     }
     @Test
     fun generateImageName_sportFootballUpperCase_returnsCorrectName() {
         val expected = "football/ManchesterUnited.jpeg"
         val teamMock = Team("Manchester United","")
-        assertEquals(expected,TeamImageProvider.generateImageName(team = teamMock,"Football"))
+        assertEquals(expected,teamImageProvider.generateImageName(team = teamMock,"Football"))
     }
     @Test
     fun generateImageName_sportFootballLowerCase_returnsCorrectName() {
         val expected = "football/ManchesterUnited.jpeg"
         val teamMock = Team("Manchester United","")
-        assertEquals(expected,TeamImageProvider.generateImageName(team = teamMock,"football"))
+        assertEquals(expected,teamImageProvider.generateImageName(team = teamMock,"football"))
     }
     @Test
     fun generateImageName_sportSoccerUpperCase_returnsCorrectName() {
         val expected = "football/ManchesterUnited.jpeg"
         val teamMock = Team("Manchester United","")
-        assertEquals(expected,TeamImageProvider.generateImageName(team = teamMock,"Soccer"))
+        assertEquals(expected,teamImageProvider.generateImageName(team = teamMock,"Soccer"))
     }
     @Test
     fun generateImageName_sportSoccerLowerCase_returnsCorrectName() {
         val expected = "football/ManchesterUnited.jpeg"
         val teamMock = Team("Manchester United","")
-        assertEquals(expected,TeamImageProvider.generateImageName(team = teamMock,"soccer"))
+        assertEquals(expected,teamImageProvider.generateImageName(team = teamMock,"soccer"))
     }
     @Test
     fun generateImageName_sportOtherUpperCase_returnsCorrectName() {
         val expected = "basketball/NewYorkKnicks.jpeg"
         val teamMock = Team("New York Knicks","")
-        assertEquals(expected,TeamImageProvider.generateImageName(team = teamMock,"Basketball"))
+        assertEquals(expected,teamImageProvider.generateImageName(team = teamMock,"Basketball"))
     }
     @Test
     fun generateImageName_sportOtherLowerCase_returnsCorrectName() {
         val expected = "basketball/NewYorkKnicks.jpeg"
         val teamMock = Team("New York Knicks","")
-        assertEquals(expected,TeamImageProvider.generateImageName(team = teamMock,"basketball"))
+        assertEquals(expected,teamImageProvider.generateImageName(team = teamMock,"basketball"))
     }
 }
