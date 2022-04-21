@@ -22,56 +22,28 @@
  * SOFTWARE.
  */
 
-package com.twoplaylabs.resources
+package com.twoplaylabs.common
 
-import io.ktor.resources.*
-import kotlinx.serialization.Serializable
+import com.twoplaylabs.data.User
+import com.twoplaylabs.data.UserRole
+import com.twoplaylabs.data.common.Message
+import com.twoplaylabs.util.Constants
+import io.ktor.http.*
+import io.ktor.server.application.*
+import io.ktor.server.auth.*
+import io.ktor.server.response.*
 
 /*
     Author: Damjan Miloshevski 
     Created on 21/04/2022
     Project: betting-doctor
 */
-@Serializable
-@Resource("/api/v1//users")
-class Users(val email:String? = null){
-    @Serializable
-    @Resource("signin")
-    class SignIn(val parent: Users)
-
-    @Serializable
-    @Resource("register")
-    class SignUp(val parent: Users)
-
-    @Serializable
-    @Resource("token")
-    class RefreshToken(val parent: Users)
-
-    @Serializable
-    @Resource("verify")
-    class VerifyAccount(val parent: Users) {
-        @Serializable
-        @Resource("{id}")
-        class Id(val parent: VerifyAccount,val id: String)
+suspend fun ApplicationCall.authorize(){
+    val principal = this.principal<User>()
+    if (principal?.role != UserRole.ADMIN) {
+        this.respond(
+            HttpStatusCode.Unauthorized,
+            Message(Constants.INSUFFICIENT_PERMISSIONS, HttpStatusCode.Unauthorized.value)
+        )
     }
-
-    @Serializable
-    @Resource("signout")
-    class SignOut(val parent: Users)
-
-    @Serializable
-    @Resource("feedback")
-    class Feedback(val parent: Users)
-
-    @Serializable
-    @Resource("{id}")
-    class Id(val parent: Users,val id: String) {
-        @Serializable
-        @Resource("change-password")
-        class ChangePassword(val parent:Id)
-    }
-
-    @Serializable
-    @Resource("notifications")
-    class Notifications(val parent: Users)
 }

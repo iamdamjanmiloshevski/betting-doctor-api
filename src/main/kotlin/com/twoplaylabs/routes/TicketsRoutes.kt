@@ -24,9 +24,12 @@
 
 package com.twoplaylabs.routes
 
-import com.twoplaylabs.controllers.*
-import com.twoplaylabs.data.*
+import com.twoplaylabs.common.authorize
+import com.twoplaylabs.controllers.TicketController
+import com.twoplaylabs.data.BettingTip
+import com.twoplaylabs.data.Ticket
 import com.twoplaylabs.data.common.Message
+import com.twoplaylabs.resources.Tickets
 import com.twoplaylabs.util.BettingTipManager
 import com.twoplaylabs.util.Constants
 import com.twoplaylabs.util.toDateFromQueryParam
@@ -34,6 +37,9 @@ import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.request.*
+import io.ktor.server.resources.*
+import io.ktor.server.resources.post
+import io.ktor.server.resources.put
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import org.bson.types.ObjectId
@@ -44,30 +50,23 @@ import org.koin.java.KoinJavaComponent.inject
     Created on 05/04/2022
     Project: betting-doctor
 */
-fun Route.ticketsController(controller: TicketController){
+fun Route.ticketsController(controller: TicketController) {
     val bettingTipsManager by inject<BettingTipManager>(BettingTipManager::class.java)
-    route(Constants.TICKETS_ROUTE) {
-        authenticate(System.getenv(Constants.AUTH_CONFIG_ADMIN)) {
-            createTicket(bettingTipsManager, controller)
-            updateTicket(bettingTipsManager, controller)
-            deleteTicketById(controller)
-            deleteAllTickets(controller)
-        }
-        getAllTickets(controller)
-        searchTicketByDate(controller)
-        findTicketById(controller)
+    authenticate(System.getenv(Constants.AUTH_CONFIG_ADMIN)) {
+        createTicket(bettingTipsManager, controller)
+        updateTicket(bettingTipsManager, controller)
+        deleteTicketById(controller)
+        deleteAllTickets(controller)
     }
+    tickets(controller)
+    findTicketById(controller)
 }
 
 private fun Route.findTicketById(controller: TicketController) {
-    get(Constants.ID_ROUTE) {
-        val id = call.parameters[Constants.PARAM_ID] ?: call.respond(
-            HttpStatusCode.BadRequest,
-            Message("Please provide a valid id", HttpStatusCode.BadRequest.value)
-        )
+    get<Tickets.Id> { ticket ->
         try {
-            val ticket = controller.findTicketById(id.toString())
-            ticket?.let { call.respond(it) } ?: call.respond(HttpStatusCode.NotFound)
+            val ticketInDb = controller.findTicketById(ticket.id)
+            ticketInDb?.let { call.respond(it) } ?: call.respond(HttpStatusCode.NotFound)
         } catch (e: Throwable) {
             application.log.error(e.message)
             call.respond(
@@ -78,74 +77,65 @@ private fun Route.findTicketById(controller: TicketController) {
     }
 }
 
-private fun Route.searchTicketByDate(controller: TicketController) {
-    get(Constants.SEARCH_ROUTE) {
-        val dateParam = call.request.queryParameters[Constants.PARAM_DATE]
-        try {
-            dateParam ?: call.respond(
-                HttpStatusCode.BadRequest,
-                Message("Please provide a valid date", HttpStatusCode.BadRequest.value)
-            )
-            dateParam?.let { gmtDate ->
-                val date = gmtDate.toDateFromQueryParam()
-                val ticket = controller.findTicketByDate(date)
-                ticket?.let { call.respond(HttpStatusCode.OK, ticket) } ?: call.respond(
+
+private fun Route.tickets(controller: TicketController) {
+    get<Tickets> { ticket ->
+        if (ticket.date != null) {
+            //get ticket by date
+            val dateParam = ticket.date
+            try {
+                val date = dateParam.toDateFromQueryParam()
+                val ticketInDb = controller.findTicketByDate(date)
+                ticketInDb?.let { call.respond(HttpStatusCode.OK, ticketInDb) } ?: call.respond(
                     HttpStatusCode.NotFound,
                     Message("Apologies we have nothing for you", HttpStatusCode.NoContent.value, date)
                 )
-            } ?: call.respond(HttpStatusCode.InternalServerError)
-
-        } catch (e: Throwable) {
-            application.log.error(e.message)
-            call.respond(
-                HttpStatusCode.BadRequest,
-                Message(Constants.SOMETHING_WENT_WRONG, HttpStatusCode.BadRequest.value)
-            )
-        }
-    }
-}
-
-private fun Route.getAllTickets(controller: TicketController) {
-    get {
-        try {
-            val items = controller.findAllTickets()
-            call.respond(items)
-        } catch (e: Throwable) {
-            application.log.error(e.message)
-            call.respond(
-                HttpStatusCode.BadRequest,
-                Message(Constants.SOMETHING_WENT_WRONG, HttpStatusCode.BadRequest.value)
-            )
+            } catch (e: Throwable) {
+                application.log.error(e.message)
+                call.respond(
+                    HttpStatusCode.BadRequest,
+                    Message(Constants.SOMETHING_WENT_WRONG, HttpStatusCode.BadRequest.value)
+                )
+            }
+        } else {
+            try {
+                val items = controller.findAllTickets()
+                call.respond(items)
+            } catch (e: Throwable) {
+                application.log.error(e.message)
+                call.respond(
+                    HttpStatusCode.BadRequest,
+                    Message(Constants.SOMETHING_WENT_WRONG, HttpStatusCode.BadRequest.value)
+                )
+            }
         }
     }
 }
 
 private fun Route.deleteAllTickets(controller: TicketController) {
-    delete {
-        try {
-            val deletedCount = controller.deleteAllTickets()
-            application.log.debug("Deleted items $deletedCount")
-            if (deletedCount > 0) {
-                call.respond(HttpStatusCode.OK)
-            } else call.respond(HttpStatusCode.NoContent)
-        } catch (e: Throwable) {
-            application.log.error(e.message)
-            call.respond(
-                HttpStatusCode.BadRequest,
-                Message(Constants.SOMETHING_WENT_WRONG, HttpStatusCode.BadRequest.value)
-            )
-        }
-    }
+   delete<Tickets> {
+       call.authorize()
+       try {
+           val deletedCount = controller.deleteAllTickets()
+           application.log.debug("Deleted items $deletedCount")
+           if (deletedCount > 0) {
+               call.respond(HttpStatusCode.OK)
+           } else call.respond(HttpStatusCode.NoContent)
+       } catch (e: Throwable) {
+           application.log.error(e.message)
+           call.respond(
+               HttpStatusCode.BadRequest,
+               Message(Constants.SOMETHING_WENT_WRONG, HttpStatusCode.BadRequest.value)
+           )
+       }
+   }
 }
 
 private fun Route.deleteTicketById(controller: TicketController) {
-    delete(Constants.ID_ROUTE) {
-        val id = call.parameters[Constants.PARAM_ID] ?: return@delete call.respond(
-            HttpStatusCode.BadRequest,
-            Message(Constants.MISSING_ID, HttpStatusCode.BadRequest.value)
-        )
+    delete<Tickets.Id> {ticket->
+        call.authorize()
         try {
-            val deletedCount = controller.deleteTicket(id)
+            val deletedCount = controller.deleteTicket(ticket.id)
             application.log.debug("Deleted items $deletedCount")
             if (deletedCount > 0) {
                 call.respond(HttpStatusCode.OK, Message(Constants.SUCCESS, HttpStatusCode.OK.value))
@@ -164,35 +154,28 @@ private fun Route.updateTicket(
     bettingTipsManager: BettingTipManager,
     controller: TicketController
 ) {
-    put {
-        val principal = call.principal<User>()
-        if (principal?.role != UserRole.ADMIN) {
-            call.respond(
-                HttpStatusCode.Unauthorized,
-                Message(Constants.INSUFFICIENT_PERMISSIONS, HttpStatusCode.Unauthorized.value)
-            )
-        } else {
-            val ticket = call.receive<Ticket>()
-            try {
-                val updatedTips = mutableListOf<BettingTip>()
-                for (tip in ticket.tips) {
-                    bettingTipsManager.fetchTeamLogosAndUpdateBettingTip(tip, callback = {
-                        updatedTips.add(it)
-                    })
-                }
-                val updatedTicket = ticket.copy(tips = updatedTips)
-                val updatedCount = controller.updateTicket(updatedTicket)
-                application.log.debug("Updated documents $updatedCount")
-                if (updatedCount > 0) {
-                    call.respond(HttpStatusCode.Accepted, ticket)
-                } else call.respond(HttpStatusCode.NoContent)
-            } catch (e: Throwable) {
-                application.log.error(e.message)
-                call.respond(
-                    HttpStatusCode.BadRequest,
-                    Message(Constants.SOMETHING_WENT_WRONG, HttpStatusCode.BadRequest.value)
-                )
+    put<Tickets> {
+        call.authorize()
+        val ticket = call.receive<Ticket>()
+        try {
+            val updatedTips = mutableListOf<BettingTip>()
+            for (tip in ticket.tips) {
+                bettingTipsManager.fetchTeamLogosAndUpdateBettingTip(tip, callback = {
+                    updatedTips.add(it)
+                })
             }
+            val updatedTicket = ticket.copy(tips = updatedTips)
+            val updatedCount = controller.updateTicket(updatedTicket)
+            application.log.debug("Updated documents $updatedCount")
+            if (updatedCount > 0) {
+                call.respond(HttpStatusCode.Accepted, ticket)
+            } else call.respond(HttpStatusCode.NoContent)
+        } catch (e: Throwable) {
+            application.log.error(e.message)
+            call.respond(
+                HttpStatusCode.BadRequest,
+                Message(Constants.SOMETHING_WENT_WRONG, HttpStatusCode.BadRequest.value)
+            )
         }
     }
 }
@@ -201,34 +184,27 @@ private fun Route.createTicket(
     bettingTipsManager: BettingTipManager,
     controller: TicketController
 ) {
-    post {
-        val principal = call.principal<User>()
-        if (principal?.role != UserRole.ADMIN) {
-            call.respond(
-                HttpStatusCode.Unauthorized,
-                Message(Constants.INSUFFICIENT_PERMISSIONS, HttpStatusCode.Unauthorized.value)
-            )
-        } else {
-            val ticket = call.receive<Ticket>()
-            try {
-                val ticketId = ObjectId()
-                val updatedTips = mutableListOf<BettingTip>()
-                for (tip in ticket.tips) {
-                    val alteredTip = tip.copy(_id = ObjectId().toString(), ticketId = ticketId.toString())
-                    bettingTipsManager.fetchTeamLogosAndUpdateBettingTip(alteredTip, callback = {
-                        updatedTips.add(it)
-                    })
-                }
-                val updatedTicket = ticket.copy(_id = ticketId.toString(), tips = updatedTips)
-                controller.insertTicket(updatedTicket)
-                call.respond(HttpStatusCode.Created, updatedTicket)
-            } catch (e: Throwable) {
-                application.log.error(e.message)
-                call.respond(
-                    HttpStatusCode.BadRequest,
-                    Message(Constants.SOMETHING_WENT_WRONG, HttpStatusCode.BadRequest.value)
-                )
+    post<Tickets> {
+        call.authorize()
+        val ticket = call.receive<Ticket>()
+        try {
+            val ticketId = ObjectId()
+            val updatedTips = mutableListOf<BettingTip>()
+            for (tip in ticket.tips) {
+                val alteredTip = tip.copy(_id = ObjectId().toString(), ticketId = ticketId.toString())
+                bettingTipsManager.fetchTeamLogosAndUpdateBettingTip(alteredTip, callback = {
+                    updatedTips.add(it)
+                })
             }
+            val updatedTicket = ticket.copy(_id = ticketId.toString(), tips = updatedTips)
+            controller.insertTicket(updatedTicket)
+            call.respond(HttpStatusCode.Created, updatedTicket)
+        } catch (e: Throwable) {
+            application.log.error(e.message)
+            call.respond(
+                HttpStatusCode.BadRequest,
+                Message(Constants.SOMETHING_WENT_WRONG, HttpStatusCode.BadRequest.value)
+            )
         }
     }
 }

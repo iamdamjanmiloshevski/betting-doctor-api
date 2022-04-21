@@ -24,6 +24,7 @@
 
 package com.twoplaylabs.routes
 
+import com.twoplaylabs.common.authorize
 import com.twoplaylabs.controllers.BettingTipsController
 import com.twoplaylabs.data.BettingTip
 import com.twoplaylabs.data.User
@@ -224,15 +225,7 @@ private fun Route.createBettingTip(
         }
     }
 }
-private suspend fun ApplicationCall.authorize(){
-    val principal = this.principal<User>()
-    if (principal?.role != UserRole.ADMIN) {
-        this.respond(
-            HttpStatusCode.Unauthorized,
-            Message(Constants.INSUFFICIENT_PERMISSIONS, HttpStatusCode.Unauthorized.value)
-        )
-    }
-}
+
 
 
     

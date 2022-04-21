@@ -58,9 +58,8 @@ import java.util.*
 fun Route.userController(controller: UserController, tokenController: TokenController) {
     val emailManager by inject<EmailManager>(EmailManager::class.java)
     authenticate(System.getenv(Constants.AUTH_CONFIG_ALL)) {
-        getAllUsers(controller)//todo only admins should do this
+        users(controller)//todo only admins should do this
         getUserById(controller)
-        getUserByEmail(controller)
         updateUser(controller)
         changePassword(controller)
         deleteUser(controller)//todo only admins should do this
@@ -445,28 +444,6 @@ private fun Route.updateUser(controller: UserController) {
     }
 }
 
-private fun Route.getUserByEmail(controller: UserController) {
-    get<Users> { user ->
-        user.email?.let {
-            try {
-                val userInDb = controller.findUserByEmail(user.email)
-                userInDb?.let {
-                    call.respond(HttpStatusCode.OK, userInDb)
-                } ?: call.respond(
-                    HttpStatusCode.NotFound,
-                    Message("User with email ${user.email} not found", HttpStatusCode.NotFound.value)
-                )
-            } catch (e: Exception) {
-                application.log.error(e.message)
-                call.respond(
-                    HttpStatusCode.BadRequest,
-                    Message(Constants.SOMETHING_WENT_WRONG, HttpStatusCode.BadRequest.value)
-                )
-            }
-        }
-    }
-}
-
 private fun Route.getUserById(controller: UserController) {
     get<Users.Id> { user ->
         try {
@@ -487,17 +464,37 @@ private fun Route.getUserById(controller: UserController) {
     }
 }
 
-private fun Route.getAllUsers(controller: UserController) {
-    get<Users> {
-        try {
-            val users = controller.findAllUsers()
-            call.respond(users)
-        } catch (e: Throwable) {
-            application.log.error(e.message)
-            call.respond(
-                HttpStatusCode.BadRequest,
-                Message(Constants.SOMETHING_WENT_WRONG, HttpStatusCode.BadRequest.value)
-            )
+private fun Route.users(controller: UserController) {
+    get<Users> { user ->
+        if(user.email != null){
+            //get user by email
+                try {
+                    val userInDb = controller.findUserByEmail(user.email)
+                    userInDb?.let {
+                        call.respond(HttpStatusCode.OK, userInDb)
+                    } ?: call.respond(
+                        HttpStatusCode.NotFound,
+                        Message("User with email ${user.email} not found", HttpStatusCode.NotFound.value)
+                    )
+                } catch (e: Exception) {
+                    application.log.error(e.message)
+                    call.respond(
+                        HttpStatusCode.BadRequest,
+                        Message(Constants.SOMETHING_WENT_WRONG, HttpStatusCode.BadRequest.value)
+                    )
+                }
+        }else{
+            //get all users
+            try {
+                val users = controller.findAllUsers()
+                call.respond(users)
+            } catch (e: Throwable) {
+                application.log.error(e.message)
+                call.respond(
+                    HttpStatusCode.BadRequest,
+                    Message(Constants.SOMETHING_WENT_WRONG, HttpStatusCode.BadRequest.value)
+                )
+            }
         }
     }
 }

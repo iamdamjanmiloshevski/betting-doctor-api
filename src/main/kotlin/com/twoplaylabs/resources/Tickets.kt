@@ -33,45 +33,9 @@ import kotlinx.serialization.Serializable
     Project: betting-doctor
 */
 @Serializable
-@Resource("/api/v1//users")
-class Users(val email:String? = null){
-    @Serializable
-    @Resource("signin")
-    class SignIn(val parent: Users)
-
-    @Serializable
-    @Resource("register")
-    class SignUp(val parent: Users)
-
-    @Serializable
-    @Resource("token")
-    class RefreshToken(val parent: Users)
-
-    @Serializable
-    @Resource("verify")
-    class VerifyAccount(val parent: Users) {
-        @Serializable
-        @Resource("{id}")
-        class Id(val parent: VerifyAccount,val id: String)
-    }
-
-    @Serializable
-    @Resource("signout")
-    class SignOut(val parent: Users)
-
-    @Serializable
-    @Resource("feedback")
-    class Feedback(val parent: Users)
-
+@Resource("/api/v1/betting-tickets")
+class Tickets(val date:String? = null) {
     @Serializable
     @Resource("{id}")
-    class Id(val parent: Users,val id: String) {
-        @Serializable
-        @Resource("change-password")
-        class ChangePassword(val parent:Id)
-    }
-
-    @Serializable
-    @Resource("notifications")
-    class Notifications(val parent: Users)
+    class Id(val parent:Tickets,val id:String)
 }
