@@ -24,6 +24,8 @@
 
 package com.twoplaylabs.util
 
+
+
 /*
     Author: Damjan Miloshevski 
     Created on 18/06/2021
@@ -31,7 +33,7 @@ package com.twoplaylabs.util
 */
 object Constants {
     const val DB_NAME = "betting-doctor"
-    private const val API_PREFIX = "/api/v1"
+     const val API_PREFIX = "/api/v1"
     const val BETTING_TIPS_COLLECTION = "betting-tips"
     const val USERS_COLLECTION = "users"
     const val TICKETS_COLLECTION = "tickets"

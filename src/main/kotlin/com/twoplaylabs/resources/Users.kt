@@ -22,43 +22,56 @@
  * SOFTWARE.
  */
 
-package com.twoplaylabs.plugins
+package com.twoplaylabs.resources
 
-import com.twoplaylabs.controllers.*
-import com.twoplaylabs.data.common.Message
-import com.twoplaylabs.resources.BettingTips
-import com.twoplaylabs.routes.*
-import com.twoplaylabs.util.Constants
-import io.ktor.http.*
-import io.ktor.server.application.*
-import io.ktor.server.resources.*
-import io.ktor.server.response.*
-import io.ktor.server.routing.*
+import io.ktor.resources.*
+import kotlinx.serialization.Serializable
 
-fun Application.doctorBettingService() {
-    val controller by inject<BettingTipsController>()
-    val userController by inject<UserController>()
-    val tokenController by inject<TokenController>()
-    routing {
-        bettingTipsController(controller)
-        userController(userController,tokenController)
-        tokenController(tokenController)
+/*
+    Author: Damjan Miloshevski 
+    Created on 21/04/2022
+    Project: betting-doctor
+*/
+@Serializable
+@Resource("/api/v1//users")
+class Users(val email:String? = null){
+    @Serializable
+    @Resource("signin")
+    class SignIn(val parent: Users)
+
+    @Serializable
+    @Resource("register")
+    class SignUp(val parent: Users)
+
+    @Serializable
+    @Resource("token")
+    class RefreshToken(val parent: Users)
+
+    @Serializable
+    @Resource("verify")
+    class VerifyAccount(val parent: Users) {
+        @Serializable
+        @Resource("{id}")
+        class Id(val id: String)
     }
-}
 
+    @Serializable
+    @Resource("signout")
+    class SignOut(val parent: Users)
 
-fun Application.healthCheckService(){
-        healthCheckRoutes()
-}
-fun Application.sportsAnalystService(){
-    val controller by inject<TicketController>()
-    routing {
-        ticketsController(controller)
+    @Serializable
+    @Resource("feedback")
+    class Feedback(val parent: Users)
+
+    @Serializable
+    @Resource("{id}")
+    class Id(val parent: Users,val id: String) {
+        @Serializable
+        @Resource("change-password")
+        class ChangePassword(val parent:Id)
     }
+
+    @Serializable
+    @Resource("notifications")
+    class Notifications(val parent: Users)
 }
-
-
-
-
-
-

@@ -22,30 +22,32 @@
  * SOFTWARE.
  */
 
-package com.twoplaylabs
+package com.twoplaylabs.resources
 
 
-import com.twoplaylabs.modules.doctorbetting.installDoctorBettingModule
-import com.twoplaylabs.modules.sportsanalyst.installSportsAnalystModule
-import com.twoplaylabs.plugins.configureDependencyInjection
-import com.twoplaylabs.plugins.healthCheckService
-import io.ktor.server.engine.*
-import io.ktor.server.netty.*
-import com.twoplaylabs.util.Constants.PORT
-import io.ktor.server.application.*
-import io.ktor.server.plugins.callloging.*
-import io.ktor.server.resources.*
+import com.twoplaylabs.util.Constants.API_PREFIX
+import io.ktor.resources.*
+import kotlinx.serialization.Serializable
 
-
-fun main() {
-    val httpPort = System.getenv(PORT)?.toInt() ?: 8082
-    embeddedServer(Netty, port = httpPort) {
-        install(CallLogging)
-        install(Resources)
-        configureDependencyInjection()
-        healthCheckService()
-        installDoctorBettingModule()
-        installSportsAnalystModule()
-    }.start(wait = true)
+/*
+    Author: Damjan Miloshevski 
+    Created on 20/04/2022
+    Project: betting-doctor
+*/
+@Serializable
+@Resource("/api/v1/betting-tips")
+class BettingTips{
+    @Serializable
+    @Resource("{id}")
+    class Id(val parent:BettingTips = BettingTips(), val id:String)
+    @Serializable
+    @Resource("{sport}")
+    class Sport(val parent:BettingTips = BettingTips(),val sport:String){
+        @Serializable
+        @Resource("upcoming")
+        class Upcoming(val parent:Sport)
+        @Serializable
+        @Resource("older")
+        class Older(val parent:Sport)
+    }
 }
-

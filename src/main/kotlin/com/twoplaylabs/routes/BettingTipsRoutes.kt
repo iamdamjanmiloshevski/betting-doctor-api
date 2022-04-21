@@ -29,6 +29,7 @@ import com.twoplaylabs.data.BettingTip
 import com.twoplaylabs.data.User
 import com.twoplaylabs.data.UserRole
 import com.twoplaylabs.data.common.Message
+import com.twoplaylabs.resources.BettingTips
 import com.twoplaylabs.util.BettingTipManager
 import com.twoplaylabs.util.Constants
 import com.twoplaylabs.util.convertIfSoccer
@@ -36,6 +37,9 @@ import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.request.*
+import io.ktor.server.resources.*
+import io.ktor.server.resources.post
+import io.ktor.server.resources.put
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import kotlinx.coroutines.runBlocking
@@ -50,7 +54,6 @@ import java.util.*
 
 fun Route.bettingTipsController(controller:BettingTipsController){
     val bettingTipsManager by inject<BettingTipManager>(BettingTipManager::class.java)
-    route(Constants.BETTING_TIPS_ROUTE){
         authenticate(System.getenv(Constants.AUTH_CONFIG_ADMIN)) {
             createBettingTip(bettingTipsManager, controller)
             updateBettingTip(bettingTipsManager, controller)
@@ -61,18 +64,13 @@ fun Route.bettingTipsController(controller:BettingTipsController){
         getUpcomingBettingTipsBySport(controller)
         getPastBettingTipsBySport(controller)
         getBettingTipById(controller)
-    }
 }
 
 private fun Route.getBettingTipById(controller: BettingTipsController) {
-    get(Constants.ID_ROUTE) {
-        //get betting tip by id
-        val id = call.parameters[Constants.PARAM_ID] ?: return@get call.respondText(
-            Constants.MISSING_ID,
-            status = HttpStatusCode.BadRequest
-        )
-        val bettingTip = controller.findBettingTipById(id)
-        bettingTip?.let {
+    get<BettingTips.Id> {bettingTip ->
+        val id = bettingTip.id
+        val bTip = controller.findBettingTipById(id)
+        bTip?.let {
             call.respond(HttpStatusCode.OK, it)
         } ?: call.respond(
             HttpStatusCode.NotFound,
@@ -82,10 +80,8 @@ private fun Route.getBettingTipById(controller: BettingTipsController) {
 }
 
 private fun Route.getPastBettingTipsBySport(controller: BettingTipsController) {
-    get(Constants.OLDER_TIPS_BY_SPORT_ROUTE) {
-        val sport = call.parameters[Constants.PARAM_SPORT] ?: return@get call.respond(
-            HttpStatusCode.BadRequest, Message(Constants.MISSING_SPORT, HttpStatusCode.BadRequest.value)
-        )
+    get<BettingTips.Sport.Older> {bettingTip ->
+        val sport = bettingTip.parent.sport
         try {
             val tips = controller.findBettingTipsBySport(
                 sport.convertIfSoccer()
@@ -104,13 +100,10 @@ private fun Route.getPastBettingTipsBySport(controller: BettingTipsController) {
 }
 
 private fun Route.getUpcomingBettingTipsBySport(controller: BettingTipsController) {
-    get(Constants.UPCOMING_TIPS_BY_SPORT_ROUTE) {
-        val sport = call.parameters[Constants.PARAM_SPORT] ?: return@get call.respond(
-            HttpStatusCode.BadRequest, Message(Constants.MISSING_SPORT, HttpStatusCode.BadRequest.value)
-        )
+    get<BettingTips.Sport.Upcoming> { sport ->
         try {
             val tips = controller.findBettingTipsBySport(
-                sport.convertIfSoccer()
+                sport.parent.sport.convertIfSoccer()
                     .replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() },
                 true
             )
@@ -126,8 +119,8 @@ private fun Route.getUpcomingBettingTipsBySport(controller: BettingTipsControlle
 }
 
 private fun Route.getAllBettingTips(controller: BettingTipsController) {
-    get {
-        //get all betting tips
+    get<BettingTips> {
+    //get all betting tips
         try {
             val items = controller.findAllBettingTips()
             call.respond(items)
@@ -142,11 +135,9 @@ private fun Route.getAllBettingTips(controller: BettingTipsController) {
 }
 
 private fun Route.deleteBettingTipById(controller: BettingTipsController) {
-    delete(Constants.ID_ROUTE) {
-        val id = call.parameters[Constants.PARAM_ID] ?: return@delete call.respond(
-            HttpStatusCode.BadRequest,
-            Message(Constants.MISSING_ID, HttpStatusCode.BadRequest.value)
-        )
+    delete<BettingTips.Id> {bettingTip->
+        call.authorize()
+        val id = bettingTip.id
         try {
             val deletedCount = controller.deleteBettingTip(id)
             application.log.debug("Deleted items $deletedCount")
@@ -164,7 +155,8 @@ private fun Route.deleteBettingTipById(controller: BettingTipsController) {
 }
 
 private fun Route.deleteAllBettingTips(controller: BettingTipsController) {
-    delete {
+    delete<BettingTips> {
+        call.authorize()
         try {
             val deletedCount = controller.deleteAllBettingTips()
             application.log.debug("Deleted items $deletedCount")
@@ -185,7 +177,8 @@ private fun Route.updateBettingTip(
     bettingTipsManager: BettingTipManager,
     controller: BettingTipsController
 ) {
-    put {
+    put<BettingTips> {
+        call.authorize()
         val bettingTip = call.receive<BettingTip>()
         try {
             bettingTipsManager.fetchTeamLogosAndUpdateBettingTip(bettingTip, callback = { updatedBettingTip ->
@@ -212,15 +205,8 @@ private fun Route.createBettingTip(
     bettingTipsManager: BettingTipManager,
     controller: BettingTipsController
 ) {
-    post {
-        //post betting tip
-        val principal = call.principal<User>()
-        if (principal?.role != UserRole.ADMIN) {
-            call.respond(
-                HttpStatusCode.Unauthorized,
-                Message(Constants.INSUFFICIENT_PERMISSIONS, HttpStatusCode.Unauthorized.value)
-            )
-        }
+    post<BettingTips> {
+        call.authorize()
         val bettingTip = call.receive<BettingTip>()
         try {
             bettingTipsManager.fetchTeamLogosAndUpdateBettingTip(bettingTip, callback = { updatedBettingTip ->
@@ -238,7 +224,15 @@ private fun Route.createBettingTip(
         }
     }
 }
-
+private suspend fun ApplicationCall.authorize(){
+    val principal = this.principal<User>()
+    if (principal?.role != UserRole.ADMIN) {
+        this.respond(
+            HttpStatusCode.Unauthorized,
+            Message(Constants.INSUFFICIENT_PERMISSIONS, HttpStatusCode.Unauthorized.value)
+        )
+    }
+}
 
 
     

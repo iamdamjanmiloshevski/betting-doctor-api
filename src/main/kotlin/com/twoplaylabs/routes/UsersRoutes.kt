@@ -29,6 +29,7 @@ import com.google.firebase.messaging.FirebaseMessaging
 import com.twoplaylabs.controllers.*
 import com.twoplaylabs.data.*
 import com.twoplaylabs.data.common.Message
+import com.twoplaylabs.resources.Users
 import com.twoplaylabs.util.AuthUtil
 import com.twoplaylabs.util.AuthUtil.generateWelcomeUrl
 import com.twoplaylabs.util.Constants
@@ -38,6 +39,9 @@ import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.html.*
 import io.ktor.server.request.*
+import io.ktor.server.resources.*
+import io.ktor.server.resources.put
+import io.ktor.server.resources.post
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import kotlinx.html.*
@@ -53,27 +57,25 @@ import java.util.*
 */
 fun Route.userController(controller: UserController, tokenController: TokenController) {
     val emailManager by inject<EmailManager>(EmailManager::class.java)
-    route(Constants.USERS_ROUTE) {
-        authenticate(System.getenv(Constants.AUTH_CONFIG_ALL)) {
-            getAllUsers(controller)
-            getUserById(controller)
-            getUserByEmail(controller)
-            updateUser(controller)
-            changePassword(controller)
-            deleteUser(controller)
-            sendPushNotifications()
-        }
-        signIn(controller, tokenController)
-        signUp(controller, emailManager)
-        refreshToken(controller, tokenController)
-        verifyAccount(controller)
-        signOut(controller)
-        sendFeedback(controller,emailManager)
+    authenticate(System.getenv(Constants.AUTH_CONFIG_ALL)) {
+        getAllUsers(controller)//todo only admins should do this
+        getUserById(controller)
+        getUserByEmail(controller)
+        updateUser(controller)
+        changePassword(controller)
+        deleteUser(controller)//todo only admins should do this
+        sendPushNotifications()
     }
+    signIn(controller, tokenController)
+    signUp(controller, emailManager)
+    refreshToken(controller, tokenController)
+    verifyAccount(controller)
+    signOut(controller)
+    sendFeedback(controller, emailManager)
 }
 
-private fun Route.sendFeedback(controller: UserController,emailManager: EmailManager) {
-    post(Constants.FEEDBACK_ROUTE) {
+private fun Route.sendFeedback(controller: UserController, emailManager: EmailManager) {
+    post<Users.Feedback> {
         val feedbackMessage = call.receive<FeedbackMessage>()
         try {
             val id = ObjectId()
@@ -98,7 +100,7 @@ private fun Route.sendFeedback(controller: UserController,emailManager: EmailMan
 }
 
 private fun Route.signOut(controller: UserController) {
-    post(Constants.SIGN_OUT_ROUTE) {
+    post<Users.SignOut> {
         val userInput = call.receive<UserInput>()
         try {
             val user = controller.findUserByEmail(userInput.email)
@@ -119,15 +121,12 @@ private fun Route.signOut(controller: UserController) {
 }
 
 private fun Route.verifyAccount(controller: UserController) {
-    get(Constants.VERIFY_ROUTE) {
-        val id = call.parameters[Constants.PARAM_ID] ?: return@get call.respond(
-            HttpStatusCode.BadRequest,
-            Message(Constants.MISSING_ID, HttpStatusCode.BadRequest.value)
-        )
+    get<Users.VerifyAccount.Id> { user ->
+        val uid = user.id
         try {
-            val user = controller.findUserById(id)
-            user?.let {
-                val modifiedCount = controller.verifyUserAccount(id)
+            val userInDb = controller.findUserById(uid)
+            userInDb?.let {
+                val modifiedCount = controller.verifyUserAccount(uid)
                 if (modifiedCount > 0) {
                     call.respondHtml {
                         head {
@@ -171,7 +170,7 @@ private fun Route.refreshToken(
     tokenController: TokenController
 ) {
     val authUtil by inject<AuthUtil>(AuthUtil::class.java)
-    post(Constants.REFRESH_TOKEN) {
+    post<Users.RefreshToken> {
         val refreshToken = call.receive<RefreshToken>()
         try {
             val userEmail = refreshToken.userEmail
@@ -216,7 +215,7 @@ private fun Route.signUp(
     controller: UserController,
     emailManager: EmailManager
 ) {
-    post(Constants.REGISTER_ROUTE) {
+    post<Users.SignUp> {
         val userInput = call.receive<UserInput>()
         try {
             val userInDb = controller.findUserByEmail(userInput.email)
@@ -268,7 +267,7 @@ private fun Route.signIn(
     tokenController: TokenController
 ) {
     val authUtil by inject<AuthUtil>(AuthUtil::class.java)
-    post(Constants.SIGN_IN_ROUTE) {
+    post<Users.SignIn> {
         val userInput = call.receive<UserInput>()
         try {
             val user = controller.findUserByEmail(userInput.email)
@@ -303,7 +302,7 @@ private fun Route.signIn(
 }
 
 private fun Route.sendPushNotifications() {
-    post(Constants.PUSH_NOTIFICATIONS) {
+    post<Users.Notifications> {
         val notification = call.receive<Notification>()
         try {
             var notificationMessage: String? = ""
@@ -349,14 +348,9 @@ private fun Route.sendPushNotifications() {
 }
 
 private fun Route.deleteUser(controller: UserController) {
-    delete(Constants.ID_ROUTE) {
-        val parameters = call.parameters
-        val id = parameters[Constants.PARAM_ID] ?: return@delete call.respond(
-            HttpStatusCode.BadRequest,
-            Message(Constants.MISSING_ID, HttpStatusCode.BadRequest.value)
-        )
+    delete<Users.Id> { user ->
         try {
-            val deletedCount = controller.deleteUserById(id)
+            val deletedCount = controller.deleteUserById(user.id)
             if (deletedCount > 0) {
                 call.respond(HttpStatusCode.OK, Message(Constants.SUCCESS, HttpStatusCode.OK.value))
             } else call.respond(
@@ -374,22 +368,19 @@ private fun Route.deleteUser(controller: UserController) {
 }
 
 private fun Route.changePassword(controller: UserController) {
-    put(Constants.CHANGE_PWD_ROUTE) {
-        val id = call.parameters[Constants.PARAM_ID] ?: return@put call.respond(
-            HttpStatusCode.BadRequest,
-            Message(Constants.MISSING_ID, HttpStatusCode.BadRequest.value)
-        )
+    put<Users.Id.ChangePassword> { user ->
         val userInput = call.receive<UserInput>()
         try {
-            val user = controller.findUserById(id)
-            user?.let {
+            val userId = user.parent.id
+            val userInDb = controller.findUserById(userId)
+            userInDb?.let {
                 val result = BCrypt.verifyer().verify(userInput.password.toCharArray(), it.hashedPassword)
                 if (result.verified) {
                     userInput.newPassword?.let { newPwd ->
                         val newPassword =
                             BCrypt.withDefaults()
                                 .hashToString(Constants.PASSWORD_HASH_COST, newPwd.toCharArray()).toString()
-                        val modifiedCount = controller.updateUserPassword(id, newPassword)
+                        val modifiedCount = controller.updateUserPassword(userId, newPassword)
                         if (modifiedCount > 0) {
                             call.respond(
                                 HttpStatusCode.OK,
@@ -422,15 +413,10 @@ private fun Route.changePassword(controller: UserController) {
 }
 
 private fun Route.updateUser(controller: UserController) {
-    put(Constants.ID_ROUTE) {
-        val parameters = call.parameters
+    put<Users.Id> { user ->
         val userToUpdate = call.receive<User>()
-        val id = parameters[Constants.PARAM_ID] ?: return@put call.respond(
-            HttpStatusCode.BadRequest,
-            Message(Constants.MISSING_ID, HttpStatusCode.BadRequest.value)
-        )
         try {
-            val existingUser = controller.findUserById(id)
+            val existingUser = controller.findUserById(user.id)
             existingUser?.let {
                 val modifiedCount = controller.updateUser(userToUpdate)
                 if (modifiedCount > 0) {
@@ -460,37 +446,32 @@ private fun Route.updateUser(controller: UserController) {
 }
 
 private fun Route.getUserByEmail(controller: UserController) {
-    get(Constants.SEARCH_ROUTE) {
-        val email = call.parameters[Constants.PARAM_EMAIL] ?: return@get call.respond(
-            HttpStatusCode.BadRequest, Message(Constants.MISSING_EMAIL, HttpStatusCode.BadRequest.value)
-        )
-        try {
-            val user = controller.findUserByEmail(email)
-            user?.let {
-                call.respond(HttpStatusCode.OK, user)
-            } ?: call.respond(
-                HttpStatusCode.NotFound,
-                Message("User with email $email not found", HttpStatusCode.NotFound.value)
-            )
-        } catch (e: Exception) {
-            application.log.error(e.message)
-            call.respond(
-                HttpStatusCode.BadRequest,
-                Message(Constants.SOMETHING_WENT_WRONG, HttpStatusCode.BadRequest.value)
-            )
+    get<Users> { user ->
+        user.email?.let {
+            try {
+                val userInDb = controller.findUserByEmail(user.email)
+                userInDb?.let {
+                    call.respond(HttpStatusCode.OK, userInDb)
+                } ?: call.respond(
+                    HttpStatusCode.NotFound,
+                    Message("User with email ${user.email} not found", HttpStatusCode.NotFound.value)
+                )
+            } catch (e: Exception) {
+                application.log.error(e.message)
+                call.respond(
+                    HttpStatusCode.BadRequest,
+                    Message(Constants.SOMETHING_WENT_WRONG, HttpStatusCode.BadRequest.value)
+                )
+            }
         }
     }
 }
 
 private fun Route.getUserById(controller: UserController) {
-    get(Constants.ID_ROUTE) {
-        val id = call.parameters[Constants.PARAM_ID] ?: return@get call.respond(
-            HttpStatusCode.BadRequest,
-            Message(Constants.MISSING_ID, HttpStatusCode.BadRequest.value)
-        )
+    get<Users.Id> { user ->
         try {
-            val user = controller.findUserById(id)
-            user?.let {
+            val userInDb = controller.findUserById(user.id)
+            userInDb?.let {
                 call.respond(HttpStatusCode.OK, it)
             } ?: call.respond(
                 HttpStatusCode.NotFound,
@@ -507,7 +488,7 @@ private fun Route.getUserById(controller: UserController) {
 }
 
 private fun Route.getAllUsers(controller: UserController) {
-    get {
+    get<Users> {
         try {
             val users = controller.findAllUsers()
             call.respond(users)

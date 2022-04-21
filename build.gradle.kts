@@ -12,8 +12,8 @@ val koin_version: String by project
 
 plugins {
     application
-    kotlin("jvm") version "1.5.10"
-    id("org.jetbrains.kotlin.plugin.serialization") version "1.5.10"
+    kotlin("jvm") version "1.6.10"
+    id("org.jetbrains.kotlin.plugin.serialization") version "1.6.10"
     id("org.jetbrains.dokka") version "1.5.0"
 }
 
@@ -38,6 +38,7 @@ dependencies {
     implementation("io.ktor:ktor-server-auth:$ktor_version")
     implementation("io.ktor:ktor-server-auth-jwt:$ktor_version")
     implementation("io.ktor:ktor-server-content-negotiation:$ktor_version")
+    implementation("io.ktor:ktor-server-resources:$ktor_version")
     implementation("io.ktor:ktor-serialization-gson:$ktor_version")
     implementation("io.ktor:ktor-server-netty:$ktor_version")
     implementation("io.ktor:ktor-server-html-builder:$ktor_version")
