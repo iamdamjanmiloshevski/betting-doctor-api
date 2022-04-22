@@ -81,8 +81,10 @@ private fun Route.findTicketById(controller: TicketController) {
 private fun Route.tickets(controller: TicketController) {
     get<Tickets> { ticket ->
         if (ticket.date != null) {
+
             //get ticket by date
             val dateParam = ticket.date
+            println("Getting tickets by date $dateParam")
             try {
                 val date = dateParam.toDateFromQueryParam()
                 val ticketInDb = controller.findTicketByDate(date)
@@ -99,6 +101,7 @@ private fun Route.tickets(controller: TicketController) {
             }
         } else {
             try {
+                println("Getting all tickets")
                 val items = controller.findAllTickets()
                 call.respond(items)
             } catch (e: Throwable) {
@@ -168,7 +171,7 @@ private fun Route.updateTicket(
             val updatedCount = controller.updateTicket(updatedTicket)
             application.log.debug("Updated documents $updatedCount")
             if (updatedCount > 0) {
-                call.respond(HttpStatusCode.Accepted, ticket)
+                call.respond(HttpStatusCode.Accepted, updatedTicket)
             } else call.respond(HttpStatusCode.NoContent)
         } catch (e: Throwable) {
             application.log.error(e.message)

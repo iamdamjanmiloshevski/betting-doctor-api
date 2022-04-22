@@ -78,21 +78,11 @@ class TeamImageProvider(private val client: HttpClient) {
         return fileUrl.toString()
     }
 
-    @OptIn(InternalAPI::class)
     private suspend fun downloadImage(team: SportsApiData): ByteArray {
-        val statement = client.request(team.getLogo()).body<HttpStatement>()
-        return statement.execute {
-            val contentLength = it.contentLength()?.lowInt ?: 0
-            val byteArray = ByteArray(contentLength)
-            var offset = 0
-            do {
-                val currentRead = it.content.readAvailable(byteArray, offset, byteArray.size)
-                offset += currentRead
-                println("Download in progress, offset: ${offset}, current read $currentRead / $contentLength")
-            } while (offset < contentLength)
-            println("Download done")
-            return@execute byteArray
+        val httpRequestBuilder = HttpRequestBuilder().apply {
+            url(team.getLogo())
         }
+        return client.get(httpRequestBuilder).readBytes()
     }
 
     private fun generateImageBlobInfo(name: String): BlobInfo =

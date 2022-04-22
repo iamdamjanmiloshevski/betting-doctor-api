@@ -24,17 +24,22 @@
 
 package com.twoplaylabs.routes
 
+import com.twoplaylabs.common.authorize
 import com.twoplaylabs.controllers.TokenController
 import com.twoplaylabs.data.RefreshToken
 import com.twoplaylabs.data.common.Message
+import com.twoplaylabs.resources.Tokens
 import com.twoplaylabs.util.Constants
 import com.twoplaylabs.util.Constants.TOKEN_REJECT_ROUTE
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.request.*
+import io.ktor.server.resources.get
+import io.ktor.server.resources.post
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+
 
 
 /*
@@ -43,16 +48,15 @@ import io.ktor.server.routing.*
     Project: betting-doctor
 */
 fun Routing.tokenController(controller: TokenController){
-    route(Constants.TOKENS_ROUTE){
         authenticate(System.getenv(Constants.AUTH_CONFIG_ADMIN)) {
             rejectToken(controller)
             getAllTokens(controller)
         }
-    }
 }
 
 private fun Route.getAllTokens(controller: TokenController) {
-    get {
+    get<Tokens> {
+        call.authorize()
         try {
             val tokens = controller.findAllTokens()
             call.respond(HttpStatusCode.OK,tokens)
@@ -67,7 +71,7 @@ private fun Route.getAllTokens(controller: TokenController) {
 }
 
 private fun Route.rejectToken(controller: TokenController) {
-    post(TOKEN_REJECT_ROUTE) {
+    post<Tokens.Reject>{
         val refreshToken = call.receive<RefreshToken>()
         try {
             val userEmail = refreshToken.userEmail
