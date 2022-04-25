@@ -26,6 +26,11 @@ package com.twoplaylabs.resources
 
 
 import com.twoplaylabs.util.Constants.API_PREFIX
+import com.twoplaylabs.util.Constants.BETTING_TIPS_ROUTE
+import com.twoplaylabs.util.Constants.ID_ROUTE
+import com.twoplaylabs.util.Constants.OLDER_TIPS_BY_SPORT_ROUTE
+import com.twoplaylabs.util.Constants.SPORT_ROUTE
+import com.twoplaylabs.util.Constants.UPCOMING_TIPS_BY_SPORT_ROUTE
 import io.ktor.resources.*
 import kotlinx.serialization.Serializable
 
@@ -35,19 +40,19 @@ import kotlinx.serialization.Serializable
     Project: betting-doctor
 */
 @Serializable
-@Resource("/api/v1/betting-tips")
+@Resource(BETTING_TIPS_ROUTE)
 class BettingTips{
     @Serializable
-    @Resource("{id}")
+    @Resource(ID_ROUTE)
     class Id(val parent:BettingTips = BettingTips(), val id:String)
     @Serializable
-    @Resource("{sport}")
+    @Resource(SPORT_ROUTE)
     class Sport(val parent:BettingTips = BettingTips(),val sport:String){
         @Serializable
-        @Resource("upcoming")
+        @Resource(UPCOMING_TIPS_BY_SPORT_ROUTE)
         class Upcoming(val parent:Sport)
         @Serializable
-        @Resource("older")
+        @Resource(OLDER_TIPS_BY_SPORT_ROUTE)
         class Older(val parent:Sport)
     }
 }

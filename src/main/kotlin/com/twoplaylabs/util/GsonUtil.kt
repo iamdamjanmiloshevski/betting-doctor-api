@@ -25,6 +25,7 @@
 package com.twoplaylabs.util
 
 import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 
 /*
     Author: Damjan Miloshevski 
@@ -42,5 +43,13 @@ object GsonUtil {
 
     fun <T> serialize(clazz: Class<T>, model: T): String {
         return getGson().toJson(model, clazz)
+    }
+    fun <T> serializeListToJson(list:List<T>):String{
+        val listType = object : TypeToken<List<T>>() {}.type
+        return  getGson().toJson(list, listType)
+    }
+    fun <T> deserializeListToJson(json: String):List<T>{
+        val listType = object : TypeToken<List<T>>() {}.type
+        return  getGson().fromJson(json,listType)
     }
 }

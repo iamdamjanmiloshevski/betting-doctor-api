@@ -24,20 +24,17 @@
 
 package com.twoplaylabs.util
 
-import com.google.cloud.storage.*
+import com.google.cloud.storage.BlobId
+import com.google.cloud.storage.BlobInfo
+import com.google.cloud.storage.Storage
 import com.google.firebase.cloud.StorageClient
 import com.twoplaylabs.data.Team
 import com.twoplaylabs.data.sports.SportsApiData
 import io.ktor.client.*
-import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
-import io.ktor.http.*
-import io.ktor.util.*
-import io.ktor.utils.io.bits.*
 import java.util.*
 import java.util.concurrent.TimeUnit
-import kotlin.math.ceil
 
 /*
     Author: Damjan Miloshevski 
@@ -51,7 +48,8 @@ class TeamImageProvider(private val client: HttpClient) {
         val blobInfo = generateImageBlobInfo(imageName)
         val blob = bucket.get(blobInfo.name, Storage.BlobGetOption.shouldReturnRawInputStream(false))
         return if (blob != null) {
-            val url = bucket.get(imageName).signUrl(7, TimeUnit.DAYS, Storage.SignUrlOption.withV4Signature()).toString()
+            val url =
+                bucket.get(imageName).signUrl((10*365), TimeUnit.DAYS, Storage.SignUrlOption.withV2Signature()).toString()
             println("Image exists. Returning existing url $url")
             url
         } else {
@@ -62,7 +60,7 @@ class TeamImageProvider(private val client: HttpClient) {
     }
 
 
-     fun generateImageName(team: Team, sport: String): String {
+    fun generateImageName(team: Team, sport: String): String {
         val name = team.name.replace("\\s+".toRegex(), "")
         return when (sport) {
             "Soccer", "soccer" -> "football/".plus(name).plus(".jpg")

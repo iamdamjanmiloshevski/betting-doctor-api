@@ -24,6 +24,8 @@
 
 package com.twoplaylabs.resources
 
+import com.twoplaylabs.util.Constants.ID_ROUTE
+import com.twoplaylabs.util.Constants.TICKETS_ROUTE
 import io.ktor.resources.*
 import kotlinx.serialization.Serializable
 
@@ -33,9 +35,9 @@ import kotlinx.serialization.Serializable
     Project: betting-doctor
 */
 @Serializable
-@Resource("/api/v1/betting-tickets")
+@Resource(TICKETS_ROUTE)
 class Tickets(val date:String? = null) {
     @Serializable
-    @Resource("{id}")
+    @Resource(ID_ROUTE)
     class Id(val parent:Tickets,val id:String)
 }

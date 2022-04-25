@@ -1,4 +1,4 @@
-package com.twoplaylabs.plugins
+package com.twoplaylabs.util
 
 
 import com.twoplaylabs.util.convertIfSoccer
@@ -12,7 +12,7 @@ import org.junit.Test
     Project: betting-doctor
     © 2Play Technologies  2021. All rights reserved
 */
-class RoutingTest {
+class RoutingUtilsTest {
     @Test
     fun convertIfSoccer_sportSoccerNotCapitalized_returnsFootball(){
         val sport = "soccer"

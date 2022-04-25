@@ -24,6 +24,16 @@
 
 package com.twoplaylabs.resources
 
+import com.twoplaylabs.util.Constants.CHANGE_PWD_ROUTE
+import com.twoplaylabs.util.Constants.FEEDBACK_ROUTE
+import com.twoplaylabs.util.Constants.ID_ROUTE
+import com.twoplaylabs.util.Constants.PUSH_NOTIFICATIONS_ROUTE
+import com.twoplaylabs.util.Constants.REFRESH_TOKEN_ROUTE
+import com.twoplaylabs.util.Constants.REGISTER_ROUTE
+import com.twoplaylabs.util.Constants.SIGN_IN_ROUTE
+import com.twoplaylabs.util.Constants.SIGN_OUT_ROUTE
+import com.twoplaylabs.util.Constants.USERS_ROUTE
+import com.twoplaylabs.util.Constants.VERIFY_ROUTE
 import io.ktor.resources.*
 import kotlinx.serialization.Serializable
 
@@ -33,45 +43,45 @@ import kotlinx.serialization.Serializable
     Project: betting-doctor
 */
 @Serializable
-@Resource("/api/v1//users")
+@Resource(USERS_ROUTE)
 class Users(val email:String? = null){
     @Serializable
-    @Resource("signin")
+    @Resource(SIGN_IN_ROUTE)
     class SignIn(val parent: Users)
 
     @Serializable
-    @Resource("register")
+    @Resource(REGISTER_ROUTE)
     class SignUp(val parent: Users)
 
     @Serializable
-    @Resource("token")
+    @Resource(REFRESH_TOKEN_ROUTE)
     class RefreshToken(val parent: Users)
 
     @Serializable
-    @Resource("verify")
+    @Resource(VERIFY_ROUTE)
     class VerifyAccount(val parent: Users) {
         @Serializable
-        @Resource("{id}")
+        @Resource(ID_ROUTE)
         class Id(val parent: VerifyAccount,val id: String)
     }
 
     @Serializable
-    @Resource("signout")
+    @Resource(SIGN_OUT_ROUTE)
     class SignOut(val parent: Users)
 
     @Serializable
-    @Resource("feedback")
+    @Resource(FEEDBACK_ROUTE)
     class Feedback(val parent: Users)
 
     @Serializable
-    @Resource("{id}")
+    @Resource(ID_ROUTE)
     class Id(val parent: Users,val id: String) {
         @Serializable
-        @Resource("change-password")
+        @Resource(CHANGE_PWD_ROUTE)
         class ChangePassword(val parent:Id)
     }
 
     @Serializable
-    @Resource("notifications")
+    @Resource(PUSH_NOTIFICATIONS_ROUTE)
     class Notifications(val parent: Users)
 }

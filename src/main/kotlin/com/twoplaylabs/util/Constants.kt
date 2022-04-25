@@ -58,28 +58,25 @@ object Constants {
     //region routes
     const val BETTING_TIPS_ROUTE = "${API_PREFIX}/betting-tips"
     const val USERS_ROUTE = "${API_PREFIX}/users"
-    const val UPCOMING_TIPS_BY_SPORT_ROUTE = "/{sport}/upcoming"
-    const val OLDER_TIPS_BY_SPORT_ROUTE = "/{sport}/older"
-    const val ID_ROUTE = "/{id}"
-    const val CHANGE_PWD_ROUTE = "/{id}/change-password"
-    const val SIGN_IN_ROUTE = "/signin"
-    const val REGISTER_ROUTE = "/register"
-    const val VERIFY_ROUTE = "/verify/{id}"
-    const val SIGN_OUT_ROUTE = "/signout"
-    const val FEEDBACK_ROUTE = "/feedback"
-    const val REFRESH_TOKEN = "/token"
-    const val PUSH_NOTIFICATIONS = "/notifications"
-    const val TICKETS_ROUTE = "/api/v1/betting-tickets"
-    const val SEARCH_ROUTE = "/search"
+    const val UPCOMING_TIPS_BY_SPORT_ROUTE = "upcoming"
+    const val OLDER_TIPS_BY_SPORT_ROUTE = "older"
+    const val ID_ROUTE = "{id}"
+    const val SPORT_ROUTE = "{sport}"
+    const val CHANGE_PWD_ROUTE = "change-password"
+    const val SIGN_IN_ROUTE = "signin"
+    const val REGISTER_ROUTE = "register"
+    const val VERIFY_ROUTE = "verify"
+    const val SIGN_OUT_ROUTE = "signout"
+    const val FEEDBACK_ROUTE = "feedback"
+    const val REFRESH_TOKEN_ROUTE = "token"
+    const val PUSH_NOTIFICATIONS_ROUTE = "notifications"
+    const val TICKETS_ROUTE = "${API_PREFIX}/betting-tickets"
     const val TOKENS_ROUTE = "${API_PREFIX}/tokens"
-    const val TOKEN_REJECT_ROUTE = "/reject"
+    const val TOKEN_REJECT_ROUTE = "reject"
     //endregion
 
     //region https messages
     const val SOMETHING_WENT_WRONG = "Something went wrong!"
-    const val MISSING_SPORT = "Missing or malformed sport"
-    const val MISSING_ID = "Missing or malformed id"
-    const val MISSING_EMAIL = "Missing or malformed email"
     const val NO_USER_FOUND = "No user found!"
     const val USER_UPDATED_SUCCESSFULLY = "User %s has been updated successfully!"
     const val NO_USER_WITH_EMAIL = "No user with email %s found"
@@ -102,13 +99,6 @@ object Constants {
         "<html><body><p>Dear %s,<br/><br/> Thank you for your feedback.<br/><br/>We will review it carefully and get back to you as soon as possible.<br/><br/>Kind regards, <br/></br/> 2Play Technologies team"
     const val INSUFFICIENT_PERMISSIONS = "Insufficient permissions"
     const val TOKEN_DISABLED_SUCCESS = "Token disabled successfully"
-    //endregion
-
-    //region params
-    const val PARAM_SPORT = "sport"
-    const val PARAM_ID = "id"
-    const val PARAM_DATE = "date"
-    const val PARAM_EMAIL = "email"
     //endregion
 
     //region Environment variables

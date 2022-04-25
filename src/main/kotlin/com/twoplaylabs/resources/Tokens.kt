@@ -24,6 +24,9 @@
 
 package com.twoplaylabs.resources
 
+import com.twoplaylabs.util.Constants.API_PREFIX
+import com.twoplaylabs.util.Constants.TOKENS_ROUTE
+import com.twoplaylabs.util.Constants.TOKEN_REJECT_ROUTE
 import io.ktor.resources.*
 import kotlinx.serialization.Serializable
 
@@ -33,9 +36,9 @@ import kotlinx.serialization.Serializable
     Project: betting-doctor
 */
 @Serializable
-@Resource("/api/v1/tokens")
+@Resource(TOKENS_ROUTE)
 class Tokens {
     @Serializable
-    @Resource("reject")
+    @Resource(TOKEN_REJECT_ROUTE)
     class Reject(val parent:Tokens)
 }

@@ -9,6 +9,7 @@ val apache_commons_version: String by project
 val mongodb_driver_version: String by project
 val firebase_admin_version: String by project
 val koin_version: String by project
+val mockk_version:String by project
 
 plugins {
     application
@@ -44,6 +45,9 @@ dependencies {
     implementation("io.ktor:ktor-server-html-builder:$ktor_version")
     implementation("io.ktor:ktor-server-status-pages:$ktor_version")
     implementation("ch.qos.logback:logback-classic:$logback_version")
+    testImplementation("io.ktor:ktor-server-test-host:$ktor_version")
+    testImplementation("org.jetbrains.kotlin:kotlin-test:$kotlin_version")
+    testImplementation("io.mockk:mockk:$mockk_version")
     //endregion
 
     //region Client
