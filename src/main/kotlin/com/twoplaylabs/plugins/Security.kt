@@ -45,8 +45,8 @@ import org.koin.java.KoinJavaComponent.inject
     Project: betting-doctor
 */
 fun Application.configureSecurity() {
-    val jwtService by inject<JWTService>()
-    val userController by inject<UserController>()
+    val jwtService by inject<JWTService>(JWTService::class.java)
+    val userController by inject<UserController>(UserController::class.java)
 
     install(Authentication) {
         jwt(System.getenv(AUTH_CONFIG_ALL)) {

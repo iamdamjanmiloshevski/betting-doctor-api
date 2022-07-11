@@ -34,6 +34,7 @@ import io.ktor.server.application.*
 import io.ktor.server.resources.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import org.koin.ktor.ext.inject
 
 fun Application.doctorBettingService() {
     val controller by inject<BettingTipsController>()

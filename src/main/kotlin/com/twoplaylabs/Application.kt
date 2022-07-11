@@ -38,7 +38,7 @@ import io.ktor.server.resources.*
 
 
 fun main() {
-    val httpPort = System.getenv(PORT)?.toInt() ?: 8082
+    val httpPort = System.getenv(PORT)?.toInt() ?: 8080
     embeddedServer(Netty, port = httpPort) {
         install(CallLogging)
         install(Resources)
